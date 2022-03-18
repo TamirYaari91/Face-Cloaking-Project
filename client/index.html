@@ -2,19 +2,27 @@
 <html>
 <head>
     <title>
-        Python sending
+        Cloak your face!
     </title>
+    <link rel="stylesheet" href="stylesheet.css">
 </head>
 <body>
-<!--<form id="form">-->
-<label for="x">x: <input type="number" id="x" name="x" min=1 max=9></label><br>
-<label for="y">y: <input type="number" id="y" name="y" min=10 max=20></label><br>
-<button type="submit" id="inputSubmit">Submit Preferences</button>
-<!--</form>-->
-<p id="log"></p>
-<h3 id="before"></h3>
-<button id="postToPython">Post to Python</button>
-<h3 id="after"></h3>
+
+<div class="range-wrap" style="width: 50%;">
+    <h3 id="preference">Privacy vs. Usability</h3>
+    <input type="range" class="range" id="prefRange" min="1" max="10" step="1" value="5">
+    <output class="bubble"></output>
+</div>
+
+<div class="boxes">
+    <label for="x">x: <input class="box" type="number" id="x" name="x" min=1 max=9></label>
+    <br><br>
+    <button type="submit" id="inputSubmit">Submit Preferences</button>
+
+    <h3 id="before"></h3>
+    <button id="postToPython">Post to Python</button>
+    <h3 id="after"></h3>
+</div>
 
 <script src="data.js"></script>
 </body>

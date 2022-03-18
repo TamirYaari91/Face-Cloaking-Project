@@ -2,12 +2,36 @@ const postToPython = document.getElementById("postToPython")
 const before = document.getElementById("before")
 const after = document.getElementById("after")
 const inputSubmit = document.getElementById("inputSubmit");
+const allRanges = document.querySelectorAll(".range-wrap");
+const prefRange = document.getElementById("prefRange");
+
+allRanges.forEach(wrap => {
+    const range = wrap.querySelector(".range");
+    const bubble = wrap.querySelector(".bubble");
+
+    range.addEventListener("input", () => {
+        setBubble(range, bubble);
+    });
+    setBubble(range, bubble);
+});
+
+function setBubble(range, bubble) {
+    const val = range.value;
+    const min = range.min ? range.min : 0;
+    const max = range.max ? range.max : 100;
+    const newVal = Number(((val - min) * 100) / (max - min));
+    bubble.innerHTML = val;
+
+    // Sorta magic numbers based on size of the native UI thumb
+    bubble.style.left = `calc(${newVal}% + (${8 - newVal * 0.15}px))`;
+}
+
 
 inputSubmit.addEventListener('click',function () {
     x = document.getElementById("x").value;
-    y = document.getElementById("y").value;
+    y = prefRange.value;
     before.innerHTML += "Sending to Python:" + "<p>" +
-        "x = " + x + "<p>" + "y = " + y + "<p>";
+        "x = " + x + "<p>" + "Value from range: = " + y + "<p>";
 });
 
 let x; // this can be the picture
