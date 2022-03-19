@@ -1,16 +1,13 @@
-const postToPython = document.getElementById("postToPython")
-const before = document.getElementById("before")
-const after = document.getElementById("after")
-const inputSubmit = document.getElementById("inputSubmit");
+const uploadButton = document.getElementById("uploadButton");
+const after = document.getElementById("after");
 const allRanges = document.querySelectorAll(".range-wrap");
 const prefRange = document.getElementById("prefRange");
-const image_input = document.querySelector("#image_input");
+const imageInput = document.querySelector("#image_input");
 const image_box = document.getElementsByClassName("display_image")[0];
-
 const MAX_SIZE_OF_IMAGE = 500; // square - will be true for both width and height
 
 
-image_input.addEventListener("change", function () {
+imageInput.addEventListener("change", function () {
     const reader = new FileReader();
     reader.addEventListener("load", () => {
         const uploaded_image = reader.result;
@@ -18,9 +15,9 @@ image_input.addEventListener("change", function () {
     });
     reader.readAsDataURL(this.files[0]);
     reader.onload = function (e) {
-        const image = new Image();
-        image.src = e.target.result;
-        image.onload = function () {
+        const imageIn = new Image();
+        imageIn.src = e.target.result;
+        imageIn.onload = function () {
             let displaySize = resizeImage(this.width, this.height);
             image_box.style.width = displaySize[0] + "px";
             image_box.style.height = displaySize[1] + "px";
@@ -36,11 +33,10 @@ function resizeImage(originalWidth, originalHeight) {
     while (width > MAX_SIZE_OF_IMAGE || height > MAX_SIZE_OF_IMAGE) {
         width = originalWidth / i;
         height = originalHeight / i;
-        i++;
+        i = i + 0.5;
     }
     return [width, height];
 }
-
 
 allRanges.forEach(wrap => {
     const range = wrap.querySelector(".range");
@@ -63,20 +59,9 @@ function setBubble(range, bubble) {
     bubble.style.left = `calc(${newVal}% + (${8 - newVal * 0.15}px))`;
 }
 
-
-inputSubmit.addEventListener('click', function () {
-    x = document.getElementById("x").value;
-    y = prefRange.value;
-    before.innerHTML += "Sending to Python:" + "<p>" +
-        "x = " + x + "<p>" + "Value from range: = " + y + "<p>";
-});
-
-let x; // this can be the picture
-let y; // this can be the level of privacy-usability or whatever
-
-postToPython.onclick = function () {
+uploadButton.onclick = function () {
     let inputs_json = [
-        {"x": parseInt(x), "y": parseInt(y)}
+        {"prefValue": parseInt(prefRange.value)}
     ];
 
     // Get the receiver endpoint from Python using fetch:
@@ -98,9 +83,21 @@ postToPython.onclick = function () {
         }
     }).then(jsonResponse => {
             let json = jsonResponse[0];
-            after.innerHTML += "Returned from Python:" + "<p>";
-            after.innerHTML += "x = " + json.x + "<p>";
-            after.innerHTML += "y = " + json.y + "<p>";
+            after.innerHTML += "Returned from Python (should be range value +1):" + "<p>";
+            after.innerHTML += "prefValue = " + json.prefValue + "<p>";
         }
     ).catch((err) => console.error(err));
 }
+
+const formData = new FormData();
+formData.append('file', imageInput.files[0]);
+const options = {
+    method: 'POST',
+    body: formData,
+};
+
+const uploadImageButton = document.getElementById("uploadImageButton");
+uploadImageButton.onclick = function () {
+    fetch("http://127.0.0.1:5000/image_receiver", options); // promise ignored - what comes back?
+}
+

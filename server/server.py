@@ -9,7 +9,7 @@ cors = CORS(app)
 
 # Create the receiver API POST endpoint:
 @app.route("/params_receiver", methods=["POST"])
-def postME():
+def paramsHandler():
     data = request.get_json()
     data = inc_all_fields_by_one(data)
     header = data.headers
@@ -22,6 +22,7 @@ def inc_all_fields_by_one(data):
     inputs_json = data[0]
     for key in inputs_json.keys():
         print(type(inputs_json[key]))
+        print(inputs_json[key])
         inputs_json[key] += 1
     output = [inputs_json]
     print(output)
@@ -29,6 +30,14 @@ def inc_all_fields_by_one(data):
     return res
 
 
+@app.route("/image_receiver", methods=["POST"])
+def imageHandler():
+    # data = request.get_json()
+    print("received image!")
+    # data = inc_all_fields_by_one(data)
+    # header = data.headers
+    # header['Access-Control-Allow-Origin'] = '*'
+    # return data
 
 
 if __name__ == "__main__":
