@@ -8,7 +8,7 @@ cors = CORS(app)
 
 
 # Create the receiver API POST endpoint:
-@app.route("/receiver", methods=["POST"])
+@app.route("/params_receiver", methods=["POST"])
 def postME():
     data = request.get_json()
     data = inc_all_fields_by_one(data)

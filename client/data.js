@@ -4,6 +4,43 @@ const after = document.getElementById("after")
 const inputSubmit = document.getElementById("inputSubmit");
 const allRanges = document.querySelectorAll(".range-wrap");
 const prefRange = document.getElementById("prefRange");
+const image_input = document.querySelector("#image_input");
+const image_box = document.getElementsByClassName("display_image")[0];
+
+const MAX_SIZE_OF_IMAGE = 500; // square - will be true for both width and height
+
+
+image_input.addEventListener("change", function () {
+    const reader = new FileReader();
+    reader.addEventListener("load", () => {
+        const uploaded_image = reader.result;
+        image_box.style.backgroundImage = `url(${uploaded_image})`;
+    });
+    reader.readAsDataURL(this.files[0]);
+    reader.onload = function (e) {
+        const image = new Image();
+        image.src = e.target.result;
+        image.onload = function () {
+            let displaySize = resizeImage(this.width, this.height);
+            image_box.style.width = displaySize[0] + "px";
+            image_box.style.height = displaySize[1] + "px";
+            return true;
+        };
+    };
+});
+
+function resizeImage(originalWidth, originalHeight) {
+    let i = 1;
+    let width = originalWidth;
+    let height = originalHeight;
+    while (width > MAX_SIZE_OF_IMAGE || height > MAX_SIZE_OF_IMAGE) {
+        width = originalWidth / i;
+        height = originalHeight / i;
+        i++;
+    }
+    return [width, height];
+}
+
 
 allRanges.forEach(wrap => {
     const range = wrap.querySelector(".range");
@@ -27,7 +64,7 @@ function setBubble(range, bubble) {
 }
 
 
-inputSubmit.addEventListener('click',function () {
+inputSubmit.addEventListener('click', function () {
     x = document.getElementById("x").value;
     y = prefRange.value;
     before.innerHTML += "Sending to Python:" + "<p>" +
@@ -43,7 +80,7 @@ postToPython.onclick = function () {
     ];
 
     // Get the receiver endpoint from Python using fetch:
-    fetch("http://127.0.0.1:5000/receiver",
+    fetch("http://127.0.0.1:5000/params_receiver",
         {
             method: 'POST',
             headers: {
@@ -57,7 +94,7 @@ postToPython.onclick = function () {
         if (res.ok) {
             return res.json()
         } else {
-            alert("something is wrong")
+            alert("something is wrong") // needs to be clarified
         }
     }).then(jsonResponse => {
             let json = jsonResponse[0];

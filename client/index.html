@@ -7,6 +7,11 @@
     <link rel="stylesheet" href="stylesheet.css">
 </head>
 <body>
+<div class="image_container">
+    <h3 id="upload">Upload your face:</h3>
+    <input type="file" id="image_input" accept="image/png, image/jpg">
+    <div class="display_image"></div>
+</div>
 
 <div class="range-wrap" style="width: 50%;">
     <h3 id="preference">Privacy vs. Usability</h3>
@@ -17,7 +22,7 @@
 <div class="boxes">
     <label for="x">x: <input class="box" type="number" id="x" name="x" min=1 max=9></label>
     <br><br>
-    <button type="submit" id="inputSubmit">Submit Preferences</button>
+    <button type="submit" id="inputSubmit">Upload</button>
 
     <h3 id="before"></h3>
     <button id="postToPython">Post to Python</button>
