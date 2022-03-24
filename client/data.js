@@ -6,14 +6,17 @@ const imageInput = document.querySelector("#image_input");
 const image_box = document.getElementsByClassName("display_image")[0];
 const MAX_SIZE_OF_IMAGE = 500; // square - will be true for both width and height
 
+let imageInputBase64;
+
 
 imageInput.addEventListener("change", function () {
     const reader = new FileReader();
     reader.addEventListener("load", () => {
-        const uploaded_image = reader.result;
-        image_box.style.backgroundImage = `url(${uploaded_image})`;
+        imageInputBase64 = reader.result;
+        image_box.style.backgroundImage = `url(${imageInputBase64})`;
     });
     reader.readAsDataURL(this.files[0]);
+
     reader.onload = function (e) {
         const imageIn = new Image();
         imageIn.src = e.target.result;
@@ -64,7 +67,6 @@ uploadButton.onclick = function () {
         {"prefValue": parseInt(prefRange.value)}
     ];
 
-    // Get the receiver endpoint from Python using fetch:
     fetch("http://127.0.0.1:5000/params_receiver",
         {
             method: 'POST',
@@ -72,8 +74,6 @@ uploadButton.onclick = function () {
                 'Content-type': 'application/json',
                 'Accept': 'application/json'
             },
-
-            // Strigify the payload into JSON:
             body: JSON.stringify(inputs_json)
         }).then(res => {
         if (res.ok) {
@@ -89,15 +89,39 @@ uploadButton.onclick = function () {
     ).catch((err) => console.error(err));
 }
 
-const formData = new FormData();
-formData.append('file', imageInput.files[0]);
 const options = {
     method: 'POST',
-    body: formData,
+    headers: {
+        'Content-type': 'application/json',
+        'Accept': 'application/json'
+    },
+    body: JSON.stringify(imageInputBase64)
+
 };
 
 const uploadImageButton = document.getElementById("uploadImageButton");
 uploadImageButton.onclick = function () {
-    fetch("http://127.0.0.1:5000/image_receiver", options); // promise ignored - what comes back?
+    let image_json = [
+        {"imageData": imageInputBase64}
+    ];
+
+    fetch("http://127.0.0.1:5000/image_receiver", {
+        method: 'POST',
+        headers: {
+            'Content-type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify(image_json)
+    }).then(res => {
+        if (res.ok) {
+            return res.json()
+        } else {
+            alert("something is wrong") // needs to be clarified
+        }
+    }).then(jsonResponse => {
+        console.log(JSON.stringify(jsonResponse))
+        }
+    ).catch((err) => console.error(err)); // promise ignored - what comes back?
+    // console.log(JSON.stringify(imageInputBase64))
 }
 
