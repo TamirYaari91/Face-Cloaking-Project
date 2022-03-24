@@ -34,7 +34,12 @@ def inc_all_fields_by_one(data):
 def imageHandler():
     # data = request.get_json()
     print("received image!")
-    # data = inc_all_fields_by_one(data)
+    data = request.get_json()
+    image_json = data[0]
+    im_b64 = list(image_json.values())[0]
+    print(im_b64[:50])
+
+    return jsonify(success=True)
     # header = data.headers
     # header['Access-Control-Allow-Origin'] = '*'
     # return data
