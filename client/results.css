@@ -1,0 +1,25 @@
+.results_page_header {
+    text-align: center;
+}
+
+.output_display_images:hover{
+    cursor: pointer;
+}
+
+.grayscale_image_container{
+    width: fit-content;
+    height: fit-content;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 10px;
+    border: 1px solid black;
+}
+.grayscale_display_image{
+    width: 300px;
+    height: 169px;
+    border: 1px solid black;
+    background-position: center;
+    background-size: cover;
+}

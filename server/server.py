@@ -1,17 +1,21 @@
+from PIL import Image
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import base64
+from io import BytesIO
 
 # Set up Flask:
 app = Flask(__name__)
+
 # Set up Flask to bypass CORS:
 cors = CORS(app)
 
 
-# Create the receiver API POST endpoint:
 @app.route("/params_receiver", methods=["POST"])
-def paramsHandler():
+def params_handler():
     data = request.get_json()
     data = inc_all_fields_by_one(data)
+    print(data.headers)
     header = data.headers
     header['Access-Control-Allow-Origin'] = '*'
     return data
@@ -30,19 +34,56 @@ def inc_all_fields_by_one(data):
     return res
 
 
-@app.route("/image_receiver", methods=["POST"])
-def imageHandler():
-    # data = request.get_json()
-    print("received image!")
-    data = request.get_json()
+def get_image_base64_string_from_data(data):
     image_json = data[0]
     im_b64 = list(image_json.values())[0]
-    print(im_b64[:50])
+    im_b64 = im_b64[im_b64.find(",") + 1:]
+    return im_b64
 
-    return jsonify(success=True)
-    # header = data.headers
-    # header['Access-Control-Allow-Origin'] = '*'
-    # return data
+
+def image_base64_string_to_pil_image(im_b64):
+    img_string = base64.b64decode(im_b64)
+    img = Image.open(BytesIO(img_string))
+    return img
+
+
+def image_base64_string_to_jpeg(im_b64, filename):
+    decoder = open(filename + '.jpeg', 'wb')
+    decoder.write(base64.b64decode(im_b64))
+    decoder.close()
+
+
+def pil_image_make_grayscale(img):
+    return img.convert("L")
+
+
+def pil_image_to_image_base64_string(img, image_format):
+    buffered = BytesIO()
+    img.save(buffered, format=image_format)
+    img_str = str(base64.b64encode(buffered.getvalue()), 'utf-8')
+    return img_str
+
+
+@app.route("/image_receiver", methods=["POST"])
+def image_handler():
+    print("received image!")
+    data = request.get_json()
+    if len(data[0].keys()) == 0:  # no image uploaded
+        return jsonify(success=True)  # probably needs to be different
+
+    im_b64 = get_image_base64_string_from_data(data)
+    # image_base64_string_to_jpeg(im_b64, "test1")
+    img = image_base64_string_to_pil_image(im_b64)
+    img_grayscale = pil_image_make_grayscale(img)
+    img_grayscale_b64 = pil_image_to_image_base64_string(img_grayscale, "jpeg")
+
+    cloaked_images_b64 = dict()
+    cloaked_images_b64["grayscale"] = img_grayscale_b64
+    cloaked_images_b64["success"] = True
+
+    # img.show()
+
+    return jsonify(cloaked_images_b64)
 
 
 if __name__ == "__main__":

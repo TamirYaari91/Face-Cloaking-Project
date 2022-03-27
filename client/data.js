@@ -1,31 +1,40 @@
+// let pageId = document.head.id;
+// let isUploadPage = pageId === "upload_page"
+// let isResultsPage = pageId === "results_page"
+
+const MAX_SIZE_OF_IMAGE = 500; // square - will be true for both width and height
 const uploadButton = document.getElementById("uploadButton");
 const after = document.getElementById("after");
 const allRanges = document.querySelectorAll(".range-wrap");
 const prefRange = document.getElementById("prefRange");
-const imageInput = document.querySelector("#image_input");
-const image_box = document.getElementsByClassName("display_image")[0];
-const MAX_SIZE_OF_IMAGE = 500; // square - will be true for both width and height
+const uploadImageInput = document.querySelector("#image_input");
+const uploadImageBox = document.getElementsByClassName("display_image")[0];
+const uploadImageButton = document.getElementById("uploadImageButton");
+let uploadImageInputBase64;
+let isCloakingCompleted = Boolean(0);
 
-let imageInputBase64;
+localStorage.clear();
 
+function fillBoxWithImageFromFile(e, imageBox) {
+    const imageIn = new Image();
+    imageIn.src = e.target.result;
+    imageIn.onload = function () {
+        let displaySize = resizeImage(this.width, this.height);
+        imageBox.style.width = displaySize[0] + "px";
+        imageBox.style.height = displaySize[1] + "px";
+        return true;
+    }
+}
 
-imageInput.addEventListener("change", function () {
+uploadImageInput.addEventListener("change", function () {
     const reader = new FileReader();
     reader.addEventListener("load", () => {
-        imageInputBase64 = reader.result;
-        image_box.style.backgroundImage = `url(${imageInputBase64})`;
+        uploadImageInputBase64 = reader.result;
+        uploadImageBox.style.backgroundImage = `url(${uploadImageInputBase64})`;
     });
     reader.readAsDataURL(this.files[0]);
-
     reader.onload = function (e) {
-        const imageIn = new Image();
-        imageIn.src = e.target.result;
-        imageIn.onload = function () {
-            let displaySize = resizeImage(this.width, this.height);
-            image_box.style.width = displaySize[0] + "px";
-            image_box.style.height = displaySize[1] + "px";
-            return true;
-        };
+        fillBoxWithImageFromFile(e, uploadImageBox);
     };
 });
 
@@ -72,7 +81,8 @@ uploadButton.onclick = function () {
             method: 'POST',
             headers: {
                 'Content-type': 'application/json',
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                'Access-Control-Allow-Origin': '*'
             },
             body: JSON.stringify(inputs_json)
         }).then(res => {
@@ -89,20 +99,9 @@ uploadButton.onclick = function () {
     ).catch((err) => console.error(err));
 }
 
-const options = {
-    method: 'POST',
-    headers: {
-        'Content-type': 'application/json',
-        'Accept': 'application/json'
-    },
-    body: JSON.stringify(imageInputBase64)
-
-};
-
-const uploadImageButton = document.getElementById("uploadImageButton");
 uploadImageButton.onclick = function () {
     let image_json = [
-        {"imageData": imageInputBase64}
+        {"imageData": uploadImageInputBase64}
     ];
 
     fetch("http://127.0.0.1:5000/image_receiver", {
@@ -118,10 +117,21 @@ uploadImageButton.onclick = function () {
         } else {
             alert("something is wrong") // needs to be clarified
         }
-    }).then(jsonResponse => {
-        console.log(JSON.stringify(jsonResponse))
-        }
-    ).catch((err) => console.error(err)); // promise ignored - what comes back?
-    // console.log(JSON.stringify(imageInputBase64))
+    })
+        .then(jsonResponse => {
+            // check if cloaking was made - nothing came back empty or something like that
+
+            isCloakingCompleted = Boolean(1);
+
+            for (let key in jsonResponse) {
+                if (key === "success") {
+                    continue;
+                }
+                let value = jsonResponse[key];
+                localStorage.setItem(key, value);
+            }
+            console.log(localStorage);
+        })
+        .catch((err) => console.error(err));
 }
 
