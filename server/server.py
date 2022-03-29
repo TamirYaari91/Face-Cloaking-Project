@@ -15,21 +15,16 @@ cors = CORS(app)
 def params_handler():
     data = request.get_json()
     data = inc_all_fields_by_one(data)
-    print(data.headers)
     header = data.headers
     header['Access-Control-Allow-Origin'] = '*'
     return data
 
 
 def inc_all_fields_by_one(data):
-    print(data)
     inputs_json = data[0]
     for key in inputs_json.keys():
-        print(type(inputs_json[key]))
-        print(inputs_json[key])
         inputs_json[key] += 1
     output = [inputs_json]
-    print(output)
     res = jsonify(output)
     return res
 
@@ -66,13 +61,12 @@ def pil_image_to_image_base64_string(img, image_format):
 
 @app.route("/image_receiver", methods=["POST"])
 def image_handler():
-    print("received image!")
     data = request.get_json()
     if len(data[0].keys()) == 0:  # no image uploaded
         return jsonify(success=True)  # probably needs to be different
 
     im_b64 = get_image_base64_string_from_data(data)
-    # image_base64_string_to_jpeg(im_b64, "test1")
+    # image_base64_string_to_jpeg(im_b64, "input/input_image")
     img = image_base64_string_to_pil_image(im_b64)
     img_grayscale = pil_image_make_grayscale(img)
     img_grayscale_b64 = pil_image_to_image_base64_string(img_grayscale, "jpeg")

@@ -2,16 +2,26 @@
 // let isUploadPage = pageId === "upload_page"
 // let isResultsPage = pageId === "results_page"
 
+//region Constants
+
 const MAX_SIZE_OF_IMAGE = 500; // square - will be true for both width and height
-const uploadButton = document.getElementById("uploadButton");
+const uploadPrefValueButton = document.getElementById("uploadPrefValueButton");
 const after = document.getElementById("after");
 const allRanges = document.querySelectorAll(".range-wrap");
 const prefRange = document.getElementById("prefRange");
 const uploadImageInput = document.querySelector("#image_input");
 const uploadImageBox = document.getElementsByClassName("display_image")[0];
 const uploadImageButton = document.getElementById("uploadImageButton");
+
+const jsonHeaders = {
+    'Content-type': 'application/json',
+    'Accept': 'application/json'
+}
+const domain = "http://127.0.0.1:5000/";
+
+//endregion
+
 let uploadImageInputBase64;
-let isCloakingCompleted = Boolean(0);
 
 localStorage.clear();
 
@@ -53,7 +63,6 @@ function resizeImage(originalWidth, originalHeight) {
 allRanges.forEach(wrap => {
     const range = wrap.querySelector(".range");
     const bubble = wrap.querySelector(".bubble");
-
     range.addEventListener("input", () => {
         setBubble(range, bubble);
     });
@@ -71,67 +80,63 @@ function setBubble(range, bubble) {
     bubble.style.left = `calc(${newVal}% + (${8 - newVal * 0.15}px))`;
 }
 
-uploadButton.onclick = function () {
-    let inputs_json = [
-        {"prefValue": parseInt(prefRange.value)}
-    ];
-
-    fetch("http://127.0.0.1:5000/params_receiver",
-        {
-            method: 'POST',
-            headers: {
-                'Content-type': 'application/json',
-                'Accept': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
-            body: JSON.stringify(inputs_json)
-        }).then(res => {
-        if (res.ok) {
-            return res.json()
-        } else {
-            alert("something is wrong") // needs to be clarified
-        }
-    }).then(jsonResponse => {
-            let json = jsonResponse[0];
-            after.innerHTML += "Returned from Python (should be range value +1):" + "<p>";
-            after.innerHTML += "prefValue = " + json.prefValue + "<p>";
-        }
-    ).catch((err) => console.error(err));
+async function postJsonToPythonAPI(domain, subdirectory, jsonBody) {
+    const fullPath = domain + subdirectory;
+    const fullJson = {
+        method: 'POST',
+        headers: jsonHeaders,
+        body: JSON.stringify(jsonBody)
+    };
+    return fetch(fullPath,fullJson);
 }
 
-uploadImageButton.onclick = function () {
+async function extarctPrefValueFromJsonUpdateHTML(json) {
+    json = json[0];
+    after.innerHTML += "Returned from Python (should be range value +1):" + "<p>";
+    after.innerHTML += "prefValue = " + json.prefValue + "<p>";
+}
+
+async function extractJsonFromFetchRes(res) {
+    if (res.ok) {
+        return res.json();
+    } else {
+        alert("something is wrong");
+    }
+}
+
+async function extractImageFromJsonAddToLocalStorage(json) {
+    for (let key in json) {
+        if (key === "success") {
+            continue;
+        }
+        let value = json[key];
+        localStorage.setItem(key, value);
+    }
+}
+
+async function uploadPrefValueClick() {
+    let inputs_json = [
+        {"prefValue": parseInt(prefRange.value)}];
+
+    const fetchRes = await postJsonToPythonAPI(domain, "params_receiver", inputs_json);
+    const jsonFromFetchRes = await extractJsonFromFetchRes(fetchRes);
+    await extarctPrefValueFromJsonUpdateHTML(jsonFromFetchRes);
+}
+
+async function uploadImageClick() {
     let image_json = [
         {"imageData": uploadImageInputBase64}
     ];
+    const fetchRes = await postJsonToPythonAPI(domain,"image_receiver",image_json);
+    const jsonFromFetchRes = await extractJsonFromFetchRes(fetchRes);
+    await extractImageFromJsonAddToLocalStorage(jsonFromFetchRes);
+}
 
-    fetch("http://127.0.0.1:5000/image_receiver", {
-        method: 'POST',
-        headers: {
-            'Content-type': 'application/json',
-            'Accept': 'application/json'
-        },
-        body: JSON.stringify(image_json)
-    }).then(res => {
-        if (res.ok) {
-            return res.json()
-        } else {
-            alert("something is wrong") // needs to be clarified
-        }
-    })
-        .then(jsonResponse => {
-            // check if cloaking was made - nothing came back empty or something like that
+uploadPrefValueButton.onclick = function () {
+    uploadPrefValueClick();
+};
 
-            isCloakingCompleted = Boolean(1);
-
-            for (let key in jsonResponse) {
-                if (key === "success") {
-                    continue;
-                }
-                let value = jsonResponse[key];
-                localStorage.setItem(key, value);
-            }
-            console.log(localStorage);
-        })
-        .catch((err) => console.error(err));
+uploadImageButton.onclick = function () {
+    uploadImageClick();
 }
 
