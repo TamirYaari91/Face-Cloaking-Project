@@ -1,22 +1,20 @@
-// let pageId = document.head.id;
-// let isUploadPage = pageId === "upload_page"
-// let isResultsPage = pageId === "results_page"
+//region Imports
+
+import {resizeImage} from "./shared_functions_and_consts.js";
+
+//endregion
 
 //region Constants
 
-const MAX_SIZE_OF_IMAGE = 500; // square - will be true for both width and height
-const uploadPrefValueButton = document.getElementById("uploadPrefValueButton");
 const after = document.getElementById("after");
 const allRanges = document.querySelectorAll(".range-wrap");
 const prefRange = document.getElementById("prefRange");
 const uploadImageInput = document.querySelector("#image_input");
 const uploadImageBox = document.getElementsByClassName("display_image")[0];
 const uploadImageButton = document.getElementById("uploadImageButton");
-
 const jsonHeaders = {
     'Content-type': 'application/json',
-    'Accept': 'application/json'
-}
+    'Accept': 'application/json'}
 const domain = "http://127.0.0.1:5000/";
 
 //endregion
@@ -48,17 +46,17 @@ uploadImageInput.addEventListener("change", function () {
     };
 });
 
-function resizeImage(originalWidth, originalHeight) {
-    let i = 1;
-    let width = originalWidth;
-    let height = originalHeight;
-    while (width > MAX_SIZE_OF_IMAGE || height > MAX_SIZE_OF_IMAGE) {
-        width = originalWidth / i;
-        height = originalHeight / i;
-        i = i + 0.5;
-    }
-    return [width, height];
-}
+// export function resizeImage(originalWidth, originalHeight) {
+//     let i = 1;
+//     let width = originalWidth;
+//     let height = originalHeight;
+//     while (width > MAX_SIZE_OF_IMAGE || height > MAX_SIZE_OF_IMAGE) {
+//         width = originalWidth / i;
+//         height = originalHeight / i;
+//         i = i + 0.5;
+//     }
+//     return [width, height];
+// }
 
 allRanges.forEach(wrap => {
     const range = wrap.querySelector(".range");
@@ -87,10 +85,10 @@ async function postJsonToPythonAPI(domain, subdirectory, jsonBody) {
         headers: jsonHeaders,
         body: JSON.stringify(jsonBody)
     };
-    return fetch(fullPath,fullJson);
+    return fetch(fullPath, fullJson);
 }
 
-async function extarctPrefValueFromJsonUpdateHTML(json) {
+async function extractPrefValueFromJsonUpdateHTML(json) {
     json = json[0];
     after.innerHTML += "Returned from Python (should be range value +1):" + "<p>";
     after.innerHTML += "prefValue = " + json.prefValue + "<p>";
@@ -114,29 +112,30 @@ async function extractImageFromJsonAddToLocalStorage(json) {
     }
 }
 
-async function uploadPrefValueClick() {
-    let inputs_json = [
+async function uploadImageClick() {
+    let jsonBody = [
         {"prefValue": parseInt(prefRange.value)}];
 
-    const fetchRes = await postJsonToPythonAPI(domain, "params_receiver", inputs_json);
-    const jsonFromFetchRes = await extractJsonFromFetchRes(fetchRes);
-    await extarctPrefValueFromJsonUpdateHTML(jsonFromFetchRes);
-}
+    let fetchRes = await postJsonToPythonAPI(domain, "params_receiver", jsonBody);
+    let jsonFromFetchRes = await extractJsonFromFetchRes(fetchRes);
+    await extractPrefValueFromJsonUpdateHTML(jsonFromFetchRes);
 
-async function uploadImageClick() {
-    let image_json = [
-        {"imageData": uploadImageInputBase64}
-    ];
-    const fetchRes = await postJsonToPythonAPI(domain,"image_receiver",image_json);
-    const jsonFromFetchRes = await extractJsonFromFetchRes(fetchRes);
+    jsonBody = [
+        {"imageData": uploadImageInputBase64}];
+
+    fetchRes = await postJsonToPythonAPI(domain, "image_receiver", jsonBody);
+    jsonFromFetchRes = await extractJsonFromFetchRes(fetchRes);
     await extractImageFromJsonAddToLocalStorage(jsonFromFetchRes);
 }
 
-uploadPrefValueButton.onclick = function () {
-    uploadPrefValueClick();
-};
+uploadImageButton.onclick = async function () {
+    let ignore = uploadImageClick();
 
-uploadImageButton.onclick = function () {
-    uploadImageClick();
+    await new Promise(r => setTimeout(r, 200));
+    //TODO ^
+    // Instead of this, will need to wait for a type of signal from the server
+    // that cloaking is completed before loading results page
+
+    window.open("results.html", "_blank");
 }
 

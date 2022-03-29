@@ -7,9 +7,15 @@
 </head>
 <body>
 <h1 class = "page_header">Cloak Your Face &#129313;</h1>
+<div class="general_description">
+    <p>description bla bla bla</p>
+</div>
 <div class="image_container">
     <h3 id="upload_header">Upload your face:</h3>
-    <input type="file" id="image_input" accept="image/png, image/jpg">
+    <label class="button">
+        <input type="file" id="image_input" accept="image/png, image/jpg">
+        Choose file
+    </label>
     <div class="display_image"></div>
 </div>
 
@@ -20,14 +26,14 @@
 </div>
 
 <div class="buttons">
-    <button id="uploadPrefValueButton">Upload prefValue</button>
+<!--    <button id="uploadPrefValueButton">Upload prefValue</button>-->
     <h3 id="after"></h3>
-    <button id="uploadImageButton">Upload image</button>
+    <button id="uploadImageButton" class="button">Upload image</button>
     <h3 id="afterImage"></h3>
+    <p>Perhaps here there will be a progress bar saying "Cloaking..." or something</p>
+
 </div>
 
-<p><a href="results.html" target="_blank">Results Page</a></p>
-
-<script src="data.js"></script>
+<script type="module" src="data.js"></script>
 </body>
 </html>
