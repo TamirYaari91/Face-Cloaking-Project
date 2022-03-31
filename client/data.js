@@ -6,9 +6,9 @@ import {resizeImage} from "./shared_functions_and_consts.js";
 
 //region Constants
 
-const after = document.getElementById("after");
-const allRanges = document.querySelectorAll(".range-wrap");
 const prefRange = document.getElementById("prefRange");
+const loadingMessage = document.getElementById("loadingMessage");
+const spinner = document.getElementById("spinner");
 const uploadImageInput = document.querySelector("#image_input");
 const uploadImageBox = document.getElementsByClassName("display_image")[0];
 const uploadImageButton = document.getElementById("uploadImageButton");
@@ -16,6 +16,7 @@ const jsonHeaders = {
     'Content-type': 'application/json',
     'Accept': 'application/json'}
 const domain = "http://127.0.0.1:5000/";
+let isFileChosen = false;
 
 //endregion
 
@@ -30,6 +31,7 @@ function fillBoxWithImageFromFile(e, imageBox) {
         let displaySize = resizeImage(this.width, this.height);
         imageBox.style.width = displaySize[0] + "px";
         imageBox.style.height = displaySize[1] + "px";
+        imageBox.style.border = "1px solid black";
         return true;
     }
 }
@@ -44,39 +46,8 @@ uploadImageInput.addEventListener("change", function () {
     reader.onload = function (e) {
         fillBoxWithImageFromFile(e, uploadImageBox);
     };
+    isFileChosen = true;
 });
-
-// export function resizeImage(originalWidth, originalHeight) {
-//     let i = 1;
-//     let width = originalWidth;
-//     let height = originalHeight;
-//     while (width > MAX_SIZE_OF_IMAGE || height > MAX_SIZE_OF_IMAGE) {
-//         width = originalWidth / i;
-//         height = originalHeight / i;
-//         i = i + 0.5;
-//     }
-//     return [width, height];
-// }
-
-allRanges.forEach(wrap => {
-    const range = wrap.querySelector(".range");
-    const bubble = wrap.querySelector(".bubble");
-    range.addEventListener("input", () => {
-        setBubble(range, bubble);
-    });
-    setBubble(range, bubble);
-});
-
-function setBubble(range, bubble) {
-    const val = range.value;
-    const min = range.min ? range.min : 0;
-    const max = range.max ? range.max : 100;
-    const newVal = Number(((val - min) * 100) / (max - min));
-    bubble.innerHTML = val;
-
-    // Sorta magic numbers based on size of the native UI thumb
-    bubble.style.left = `calc(${newVal}% + (${8 - newVal * 0.15}px))`;
-}
 
 async function postJsonToPythonAPI(domain, subdirectory, jsonBody) {
     const fullPath = domain + subdirectory;
@@ -90,8 +61,9 @@ async function postJsonToPythonAPI(domain, subdirectory, jsonBody) {
 
 async function extractPrefValueFromJsonUpdateHTML(json) {
     json = json[0];
-    after.innerHTML += "Returned from Python (should be range value +1):" + "<p>";
-    after.innerHTML += "prefValue = " + json.prefValue + "<p>";
+    console.log("Returned from Python = range+1" );
+    console.log("prefValue = " + json.prefValue)
+    // after.innerHTML +=  + "<p>";
 }
 
 async function extractJsonFromFetchRes(res) {
@@ -112,7 +84,25 @@ async function extractImageFromJsonAddToLocalStorage(json) {
     }
 }
 
+function updateLoadingSection(isFileChosen) {
+    if (isFileChosen === false) {
+        loadingMessage.innerHTML = "You did not choose a file.";
+        loadingMessage.style.color = "red";
+        return false;
+    }
+    loadingMessage.innerHTML = "Cloaking...";
+    loadingMessage.style.color = "black";
+    spinner.style.display="inline-block";
+    return true;
+}
+
+
 async function uploadImageClick() {
+    updateLoadingSection(isFileChosen);
+    if (isFileChosen === false) {
+        return false;
+    }
+
     let jsonBody = [
         {"prefValue": parseInt(prefRange.value)}];
 
@@ -126,16 +116,20 @@ async function uploadImageClick() {
     fetchRes = await postJsonToPythonAPI(domain, "image_receiver", jsonBody);
     jsonFromFetchRes = await extractJsonFromFetchRes(fetchRes);
     await extractImageFromJsonAddToLocalStorage(jsonFromFetchRes);
+    return true;
 }
 
 uploadImageButton.onclick = async function () {
-    let ignore = uploadImageClick();
+    let isFileUploaded = await uploadImageClick();
 
-    await new Promise(r => setTimeout(r, 200));
-    //TODO ^
-    // Instead of this, will need to wait for a type of signal from the server
-    // that cloaking is completed before loading results page
+    if (isFileUploaded) {
+        await new Promise(r => setTimeout(r, 2000));
+        //TODO ^
+        // Instead of this, will need to wait for a type of signal from the server
+        // that cloaking is completed before loading results page
 
-    window.open("results.html", "_blank");
+        window.open("results.html", "_blank"); //TODO - change to _self
+    }
+
 }
 
