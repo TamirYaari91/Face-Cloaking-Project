@@ -4,4 +4,4 @@
 
 echo "Hello World"
 pwd
-mkdir FolderFromScript
+which python
