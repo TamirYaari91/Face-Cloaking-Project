@@ -1,6 +1,4 @@
 import os
-import random
-
 import paramiko
 
 ssh_port = 22
@@ -12,7 +10,6 @@ filename_for_perturbated_image = "/pert.jpg"
 
 margin = str(6)
 amplification = str(3)
-celebs = ['barack', 'bill', 'jenn', 'leo', 'mark', 'matt', 'melania', 'meryl', 'morgan', 'taylor']
 commands = \
     [
         "conda activate tf-gpu",
@@ -70,5 +67,3 @@ def connect_to_host(host, username, password, port, command):
 
 
 res = connect_to_host(c_008, my_username, my_password, ssh_port, full_command)
-
-# print(random.choice(celebs))
