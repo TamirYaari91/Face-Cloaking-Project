@@ -6,18 +6,21 @@ my_username = "tamiryaari"
 my_password = ""  # TODO - insert password here
 nova = "nova.cs.tau.ac.il"
 c_008 = "c-008.cs.tau.ac.il"
-filename_for_perturbated_image = "/pert.jpg"
+filename_for_original_image = "original.jpg"
+filename_for_perturbated_image = "cloaked.jpg"
+face_off_basepath = "/home/sharifm/teaching/uspw-0368-3544/2022-spring/group-04/face-off/"
+filepath_for_original_image = face_off_basepath + "data/test_imgs/myface/"
 
 margin = str(6)
 amplification = str(3)
 commands = \
     [
         "conda activate tf-gpu",
-        "cd /home/sharifm/teaching/uspw-0368-3544/2022-spring/group-04/face-off",
+        "cd " + face_off_basepath,
         "python src/attack.py --source myface --pair-flag true --margin " + margin + " --amplification " + amplification
     ]
 
-full_command = "\n".join(commands)
+face_off_full_command = "\n".join(commands)
 
 
 def get_path_to_final_perturbation(lines):
@@ -39,6 +42,17 @@ def download_file_from_path(ssh_client, remote_file_path, local_file_path):
     ftp_client.close()
 
 
+def upload_file_from_path(ssh_client, remote_file_path, local_file_path):
+    ftp_client = ssh_client.open_sftp()
+    ftp_client.put(local_file_path, remote_file_path)
+    ftp_client.close()
+
+
+def delete_file_from_path(ssh_client, filepath, filename):
+    del_command = "rm -f -r " + filepath + filename
+    ssh_client.exec_command(del_command)
+
+
 face_off_ret_val = ['Loading Images...\n',
                     'SUCCESS! Images written to /home/sharifm/teaching/uspw-0368-3544/2022-spring/group-04/face-off/data/new_adv_imgs/cw_l2/small_center/hinge_loss/full/cw_l2_small_center_h_loss_face_pic_bill_marg_5.40_amp_2.500.png\n',
                     'SUCCESS! Images written to /home/sharifm/teaching/uspw-0368-3544/2022-spring/group-04/face-off/data/new_adv_imgs/cw_l2/small_center/hinge_loss/crop/cw_l2_small_center_h_loss_face_pic_bill_marg_5.40_amp_2.500.png\n',
@@ -47,23 +61,42 @@ face_off_ret_val = ['Loading Images...\n',
                     'total running time =  165.0762403011322\n']
 
 
-def connect_to_host(host, username, password, port, command):
+def connect_to_host(host, username, password, port):
     ssh_client = paramiko.SSHClient()
     ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh_client.connect(host, port, username, password)
+    return ssh_client
+
+
+def face_off_init(host, username, password, port, command):
+    # Open connection
+    ssh_client = connect_to_host(host, username, password, port)
+
+    # Upload original image
+    upload_file_from_path(ssh_client, face_off_basepath + filepath_for_original_image + filename_for_original_image,
+                          os.getcwd() + filename_for_original_image)
 
     # Perform Face-Off
-    # stdin, stdout, stderr = ssh.exec_command(command)
+    # stdin, stdout, stderr = ssh_client.exec_command(command)
     # lines = stdout.readlines()
     lines = face_off_ret_val
 
+    # Delete original image
+    delete_file_from_path(ssh_client, face_off_basepath + filepath_for_original_image, filename_for_original_image)
+
+    # Download cloaked image
     final_perturbation_path = get_path_to_final_perturbation(lines)
     download_file_from_path(ssh_client, final_perturbation_path, os.getcwd() + filename_for_perturbated_image)
 
+    # Close connection
     if ssh_client is not None:
         ssh_client.close()
         # del ssh, stdin, stdout, stderr
     return lines
 
 
-res = connect_to_host(c_008, my_username, my_password, ssh_port, full_command)
+def face_off_wrapper():
+    return face_off_init(c_008, my_username, my_password, ssh_port, face_off_full_command)
+
+
+# res = face_off_wrapper()
