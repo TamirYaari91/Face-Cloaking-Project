@@ -22,6 +22,9 @@ commands = \
 
 face_off_full_command = "\n".join(commands)
 
+ls_myface = ["cd " + filepath_for_original_image, "ls"]
+ls_myface_full_command = "\n".join(ls_myface)
+
 
 def get_path_to_final_perturbation(lines):
     last_pert_ind = -1
@@ -73,30 +76,31 @@ def face_off_init(host, username, password, port, command):
     ssh_client = connect_to_host(host, username, password, port)
 
     # Upload original image
-    upload_file_from_path(ssh_client, face_off_basepath + filepath_for_original_image + filename_for_original_image,
-                          os.getcwd() + filename_for_original_image)
+    upload_file_from_path(ssh_client, filepath_for_original_image + filename_for_original_image,
+                          os.getcwd() + '/' + filename_for_original_image)
 
     # Perform Face-Off
-    # stdin, stdout, stderr = ssh_client.exec_command(command)
-    # lines = stdout.readlines()
-    lines = face_off_ret_val
+    stdin, stdout, stderr = ssh_client.exec_command(command)
+    lines = stdout.readlines()
+    # lines = face_off_ret_val
 
     # Delete original image
-    delete_file_from_path(ssh_client, face_off_basepath + filepath_for_original_image, filename_for_original_image)
+    delete_file_from_path(ssh_client, filepath_for_original_image, filename_for_original_image)
 
     # Download cloaked image
     final_perturbation_path = get_path_to_final_perturbation(lines)
-    download_file_from_path(ssh_client, final_perturbation_path, os.getcwd() + filename_for_perturbated_image)
+    download_file_from_path(ssh_client, final_perturbation_path, os.getcwd() + '/' + filename_for_perturbated_image)
 
     # Close connection
     if ssh_client is not None:
         ssh_client.close()
-        # del ssh, stdin, stdout, stderr
+        # del ssh_client, stdin, stdout, stderr
     return lines
 
 
 def face_off_wrapper():
     return face_off_init(c_008, my_username, my_password, ssh_port, face_off_full_command)
+    # return face_off_init(nova, my_username, my_password, ssh_port, face_off_full_command)
 
 
-# res = face_off_wrapper()
+res = face_off_wrapper()

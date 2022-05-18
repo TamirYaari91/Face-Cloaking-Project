@@ -1,4 +1,4 @@
 Flask==2.0.3
 Flask-cors==3.0.10
 Pillow==8.4.0
-paramiko~=2.10.3
+paramiko==2.11.0
