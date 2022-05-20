@@ -103,4 +103,4 @@ def face_off_wrapper():
     # return face_off_init(nova, my_username, my_password, ssh_port, face_off_full_command)
 
 
-res = face_off_wrapper()
+# res = face_off_wrapper()
