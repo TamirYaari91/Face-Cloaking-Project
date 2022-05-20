@@ -123,13 +123,7 @@ async function uploadImageClick() {
 
 uploadImageButton.onclick = async function () {
     let isFileUploaded = await uploadImageClick();
-
     if (isFileUploaded) {
-        await new Promise(r => setTimeout(r, 2000));
-        //TODO ^
-        // Instead of this, will need to wait for a type of signal from the server
-        // that cloaking is completed before loading results page
-
         window.open("results.html", "_blank"); //TODO - change to _self
     }
     loadingMessage.style.display = "none";

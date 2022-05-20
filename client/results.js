@@ -7,16 +7,25 @@ import {resizeImage} from "./shared_functions_and_consts.js";
 //region Constants
 
 const resultsGrayscaleImageBox = document.getElementsByClassName("grayscale_display_image")[0];
+const resultsFaceOffImageBox = document.getElementsByClassName("faceoff_display_image")[0];
+
 const resultsJsonKeyToImageBoxClass = new Map();
+
 const grayscaleImageButton = document.getElementById("grayscale_image_button");
+const faceOffImageButton = document.getElementById("faceoff_image_button");
+
 
 //endregion
 
 resultsJsonKeyToImageBoxClass.set("grayscale", resultsGrayscaleImageBox);
+resultsJsonKeyToImageBoxClass.set("faceoff", resultsFaceOffImageBox);
+
 let grayscaleImageInputBase64 = "data:image/jpeg;base64," + localStorage.getItem("grayscale");
+let faceOffImageInputBase64 = "data:image/jpeg;base64," + localStorage.getItem("faceoff");
 
 fillBoxWithImageFromJson(grayscaleImageInputBase64, resultsGrayscaleImageBox);
-// This ^ will be replaced with a loop to fill all boxes
+fillBoxWithImageFromJson(faceOffImageInputBase64, resultsFaceOffImageBox);
+// TODO - this ^ will be replaced with a loop to fill all boxes?
 
 
 function fillBoxWithImageFromJson(imageInputBase64, imageBox) {
@@ -33,6 +42,16 @@ function fillBoxWithImageFromJson(imageInputBase64, imageBox) {
 
 grayscaleImageButton.onclick = function () {
     fetch(grayscaleImageInputBase64)
+        .then(res => res.blob())
+        .then(blob => {
+            const file = new File([blob], "File name",{ type: "image/jpeg" })
+            let link = URL.createObjectURL(file);
+            window.open(link, "_blank");
+        })
+}
+
+faceOffImageButton.onclick = function () {
+    fetch(faceOffImageInputBase64)
         .then(res => res.blob())
         .then(blob => {
             const file = new File([blob], "File name",{ type: "image/jpeg" })

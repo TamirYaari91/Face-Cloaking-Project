@@ -1,4 +1,5 @@
 import os
+from time import sleep
 
 from PIL import Image
 from flask import Flask, request, jsonify
@@ -52,7 +53,7 @@ def image_base64_string_to_pil_image(im_b64):
 
 
 def image_base64_string_to_jpeg(im_b64, filename):
-    decoder = open(filename + '.jpeg', 'wb')
+    decoder = open(filename, 'wb')
     decoder.write(base64.b64decode(im_b64))
     decoder.close()
 
@@ -91,6 +92,7 @@ def image_handler():
     cloaked_images_b64["success"] = True
 
     # img.show()
+    sleep(3)  # TODO - imitates faceoff waiting time
 
     return jsonify(cloaked_images_b64)
 
