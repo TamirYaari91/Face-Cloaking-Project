@@ -1,6 +1,6 @@
 import os
 from time import sleep
-
+import threading
 from PIL import Image
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -39,6 +39,7 @@ def get_image_base64_string_from_data(data):
     im_b64 = im_b64[im_b64.find(",") + 1:]
     return im_b64
 
+
 def image_base64_string_to_pil_image(im_b64):
     img_string = base64.b64decode(im_b64)
     img = Image.open(BytesIO(img_string))
@@ -76,10 +77,14 @@ def image_handler():
     img_grayscale_b64 = pil_image_to_image_base64_string(img_grayscale, "jpeg")
 
     # Perform Face-Off
-    connect_to_uni.face_off_wrapper()
+    faceoff_thread = threading.Thread(target=connect_to_uni.faceoff_wrapper)
+    faceoff_thread.start()
+
+    # TODO - Here ^ additional algorithms will run in separate threads
+
+    faceoff_thread.join()
     img_faceoff = Image.open(os.getcwd() + '/' + connect_to_uni.filename_for_perturbated_image)
     img_faceoff_b64 = pil_image_to_image_base64_string(img_faceoff, "jpeg")
-    # TODO - This ^ should be handled by a thread so that other perturbation algorithms will run in parallel
 
     cloaked_images_b64 = dict()
     cloaked_images_b64["grayscale"] = img_grayscale_b64

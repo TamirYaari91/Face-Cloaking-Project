@@ -8,19 +8,19 @@ nova = "nova.cs.tau.ac.il"
 c_008 = "c-008.cs.tau.ac.il"
 filename_for_original_image = "original.jpg"
 filename_for_perturbated_image = "cloaked.jpg"
-face_off_basepath = "/home/sharifm/teaching/uspw-0368-3544/2022-spring/group-04/face-off/"
-filepath_for_original_image = face_off_basepath + "data/test_imgs/myface/"
+faceoff_basepath = "/home/sharifm/teaching/uspw-0368-3544/2022-spring/group-04/face-off/"
+filepath_for_original_image = faceoff_basepath + "data/test_imgs/myface/"
 
 margin = str(6)
 amplification = str(3)
 commands = \
     [
         "conda activate tf-gpu",
-        "cd " + face_off_basepath,
+        "cd " + faceoff_basepath,
         "python src/attack.py --source myface --pair-flag true --margin " + margin + " --amplification " + amplification
     ]
 
-face_off_full_command = "\n".join(commands)
+faceoff_full_command = "\n".join(commands)
 
 ls_myface = ["cd " + filepath_for_original_image, "ls"]
 ls_myface_full_command = "\n".join(ls_myface)
@@ -56,7 +56,7 @@ def delete_file_from_path(ssh_client, filepath, filename):
     ssh_client.exec_command(del_command)
 
 
-face_off_ret_val = ['Loading Images...\n',
+faceoff_ret_val = ['Loading Images...\n',
                     'SUCCESS! Images written to /home/sharifm/teaching/uspw-0368-3544/2022-spring/group-04/face-off/data/new_adv_imgs/cw_l2/small_center/hinge_loss/full/cw_l2_small_center_h_loss_face_pic_bill_marg_5.40_amp_2.500.png\n',
                     'SUCCESS! Images written to /home/sharifm/teaching/uspw-0368-3544/2022-spring/group-04/face-off/data/new_adv_imgs/cw_l2/small_center/hinge_loss/crop/cw_l2_small_center_h_loss_face_pic_bill_marg_5.40_amp_2.500.png\n',
                     'Amplifying and Writing Images----------------------5.195116334129125\n',
@@ -71,7 +71,7 @@ def connect_to_host(host, username, password, port):
     return ssh_client
 
 
-def face_off_init(host, username, password, port, command):
+def faceoff_init(host, username, password, port, command):
     # Open connection
     ssh_client = connect_to_host(host, username, password, port)
 
@@ -82,7 +82,7 @@ def face_off_init(host, username, password, port, command):
     # Perform Face-Off
     stdin, stdout, stderr = ssh_client.exec_command(command)
     lines = stdout.readlines()
-    # lines = face_off_ret_val
+    # lines = faceoff_ret_val
 
     # Delete original image
     delete_file_from_path(ssh_client, filepath_for_original_image, filename_for_original_image)
@@ -98,8 +98,8 @@ def face_off_init(host, username, password, port, command):
     return lines
 
 
-def face_off_wrapper():
-    return face_off_init(c_008, my_username, my_password, ssh_port, face_off_full_command)
+def faceoff_wrapper():
+    return faceoff_init(c_008, my_username, my_password, ssh_port, faceoff_full_command)
 
 
-# res = face_off_wrapper()
+# res = faceoff_wrapper()
