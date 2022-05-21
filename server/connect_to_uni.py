@@ -94,13 +94,12 @@ def face_off_init(host, username, password, port, command):
     # Close connection
     if ssh_client is not None:
         ssh_client.close()
-        # del ssh_client, stdin, stdout, stderr
+        del ssh_client, stdin, stdout, stderr
     return lines
 
 
 def face_off_wrapper():
     return face_off_init(c_008, my_username, my_password, ssh_port, face_off_full_command)
-    # return face_off_init(nova, my_username, my_password, ssh_port, face_off_full_command)
 
 
 # res = face_off_wrapper()

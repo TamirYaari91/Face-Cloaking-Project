@@ -39,13 +39,6 @@ def get_image_base64_string_from_data(data):
     im_b64 = im_b64[im_b64.find(",") + 1:]
     return im_b64
 
-
-def get_image_base64_string_from_jpeg(filepath, filename):
-    with open(filepath + filename, "rb") as image_file:
-        im_b64 = base64.b64encode(image_file.read())
-        return im_b64
-
-
 def image_base64_string_to_pil_image(im_b64):
     img_string = base64.b64decode(im_b64)
     img = Image.open(BytesIO(img_string))
@@ -83,18 +76,20 @@ def image_handler():
     img_grayscale_b64 = pil_image_to_image_base64_string(img_grayscale, "jpeg")
 
     # Perform Face-Off
-    # connect_to_uni.face_off_wrapper()
-    # img_faceoff_b64 = get_image_base64_string_from_jpeg(os.getcwd(), connect_to_uni.filename_for_perturbated_image)
+    connect_to_uni.face_off_wrapper()
+    img_faceoff = Image.open(os.getcwd() + '/' + connect_to_uni.filename_for_perturbated_image)
+    img_faceoff_b64 = pil_image_to_image_base64_string(img_faceoff, "jpeg")
+    # TODO - This ^ should be handled by a thread so that other perturbation algorithms will run in parallel
 
     cloaked_images_b64 = dict()
     cloaked_images_b64["grayscale"] = img_grayscale_b64
-    # cloaked_images_b64["face-off"] = img_faceoff_b64
+    cloaked_images_b64["faceoff"] = img_faceoff_b64
     cloaked_images_b64["success"] = True
 
-    # img.show()
-    sleep(3)  # TODO - imitates faceoff waiting time
+    # sleep(3)  # imitates faceoff waiting time
 
-    return jsonify(cloaked_images_b64)
+    res = jsonify(cloaked_images_b64)
+    return res
 
 
 if __name__ == "__main__":
