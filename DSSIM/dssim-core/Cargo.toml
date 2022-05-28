@@ -1,0 +1,33 @@
+[package]
+authors = ["Kornel <pornel@pornel.net>"]
+categories = ["multimedia::images"]
+description = "Library that measures structural similarity between images using a multi-scale variant of the SSIM algorithm."
+documentation = "https://docs.rs/dssim-core"
+homepage = "https://kornel.ski/dssim"
+include = ["README.md", "Cargo.toml", "src/*.rs", "LICENSE"]
+keywords = ["ssim", "image", "comparison", "objective", "metric"]
+license = "AGPL-3.0"
+name = "dssim-core"
+readme = "README.md"
+repository = "https://github.com/kornelski/dssim.git"
+version = "3.2.0"
+edition = "2018"
+
+[lib]
+crate-type = ["lib", "staticlib"]
+
+[dependencies]
+imgref = "1.9.1"
+itertools = "0.10.3"
+rayon = { version = "1.5.1", optional = true }
+rgb = "0.8.31"
+
+[dev-dependencies]
+lodepng = "3.6.0"
+
+[features]
+default = ["threads"]
+threads = ["rayon"]
+
+[package.metadata.docs.rs]
+targets = ["x86_64-unknown-linux-gnu"]
