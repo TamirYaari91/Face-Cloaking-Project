@@ -2,3 +2,4 @@ Flask==2.1.1
 Flask-cors==3.0.10
 Pillow==9.1.0
 paramiko~=2.10.3
+torch~=1.11.0
