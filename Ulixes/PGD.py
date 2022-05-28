@@ -1,42 +1,79 @@
+import math
 import torch
 import torch.nn as nn
 import numpy as np
+from facenet_pytorch.models.mtcnn import MTCNN
+from facenet_pytorch.models.inception_resnet_v1 import InceptionResnetV1
 from PIL import Image
+from torch import autograd
+
+EPSILON = 0.0001
+EMBEDDING_MODEL = InceptionResnetV1(pretrained="vggface2").eval()
 
 
-def pgd(model, input, margin=1.1, alpha=2/255, iters=40):
-    """
-    :param input: the image uploaded
-    :param margin: set to 1.1 as default, can be between [0.2, 2] to change intensity of noise masks introduced
-    """
-    anchor = positive = input
-    negative = base_epsilon_noise(input)
-    triplet_loss = nn.TripletMarginLoss(margin)
+def normalize_cloaked_image_tensor(image):
+    min_img = image.min()
+    max_img = image.max()
+    normalized_image = (image - min_img) / (max_img - min_img)
+    normalized_image *= 255.0
+    return normalized_image
 
-    DSSIM_diff_upper_bound = 1.242
+
+def Ulixes(image, margin):
+    cropped_image = crop_image(image, "cropped_image.png")
+    cloaked_image_tensor = pgd(cropped_image, margin)
+    cloaked_image_array_normalized = normalize_cloaked_image_tensor(cloaked_image_tensor).detach().numpy()
+    cloaked_image = Image.fromarray(cloaked_image_array_normalized.astype(np.uint8))
+    cloaked_image.save("cloaked_image.png")
+    return cloaked_image
+
+
+def crop_image(image, cropped_path):
+    mtcnn_pt = MTCNN(device=torch.device("cpu"))
+    image = Image.open(image).convert("RGB")
+    image_cropped = mtcnn_pt(image, save_path=cropped_path)
+    return image_cropped
+
+
+def get_embedding(image):
+    return EMBEDDING_MODEL(image.unsqueeze(0))
+
+def pgd(image, margin=1.1, alpha=0.01):
+    # margin: set to 1.1 as default, can be between [0.2, 2] to change intensity of noise masks introduced
+    anchor = positive = image
+    negative = add_epsilon_noise(image)
+    negative.requires_grad_()
+    positive.requires_grad_()
+    triplet_loss = nn.TripletMarginLoss(margin=margin, p=2)
+    embedded_positive = get_embedding(positive)
+
     threshold = 0.01
 
-    for i in range(iters):
-        images.requires_grad = True
-        outputs = model(images)
+    while True:
+        anchor.requires_grad_()
+        loss = triplet_loss(anchor, negative, positive)
+        g = autograd.grad(loss, loss)
+        with torch.no_grad():
+            anchor = torch.add(anchor, scale(g, alpha))
+        embedded_anchor = get_embedding(anchor)
+        difference_of_anchor_and_positive = embedded_anchor - embedded_positive
+        if math.copysign(1, g[0]) != 1 or np.linalg.norm(difference_of_anchor_and_positive.detach(), axis=1) < threshold:
+            break
+        anchor = np.clip(anchor, positive - EPSILON, positive + EPSILON)
+    anchor = np.clip(anchor, -1, 1)
+    return anchor
 
-        model.zero_grad()
-        cost = loss(outputs, labels).to(device)
-        cost.backward()
 
-        adv_images = images + alpha * images.grad.sign()
-        eta = torch.clamp(adv_images - ori_images, min=-eps, max=eps)
-        images = torch.clamp(ori_images + eta, min=0, max=1).detach_()
-
-    return images
-
-
-def base_epsilon_noise(image):
-    epsilon = 0.00001
-
-    for i in range(image.shape(0)):
-        for j in range(image.shape(1)):
-            image[i][j][0] += epsilon
-            image[i][j][1] += epsilon
-
+def add_epsilon_noise(image):
+    image = torch.add(image, EPSILON)
     return image
+
+
+def scale(vector, alpha):
+    inf_norm = np.linalg.norm(vector, np.inf)
+    print(vector[0].item() / inf_norm)
+    return alpha * (vector[0].detach() / inf_norm)
+
+
+if __name__ == '__main__':
+    Ulixes("C:\matt.jpg", 1.1)
