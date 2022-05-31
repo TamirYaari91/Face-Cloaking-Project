@@ -23,6 +23,10 @@ def Ulixes(image, margin):
     cropped_image = crop_image(image, "cropped_image.png")
     cloaked_image_tensor = pgd(cropped_image, margin)
     cloaked_image_array_normalized = normalize_cloaked_image_tensor(cloaked_image_tensor).detach().numpy()
+
+    cloaked_image_array_normalized = np.swapaxes(cloaked_image_array_normalized, 0, 1)  # [3, 160, 160] -> [160, 3, 160]
+    cloaked_image_array_normalized = np.swapaxes(cloaked_image_array_normalized, 1, 2)  # [160, 3, 160] -> [160, 160, 3]
+
     cloaked_image = Image.fromarray(cloaked_image_array_normalized.astype(np.uint8))
     cloaked_image.save("cloaked_image.png")
     return cloaked_image
@@ -57,7 +61,8 @@ def pgd(image, margin=1.1, alpha=0.01):
             anchor = torch.add(anchor, scale(g, alpha))
         embedded_anchor = get_embedding(anchor)
         difference_of_anchor_and_positive = embedded_anchor - embedded_positive
-        if math.copysign(1, g[0]) != 1 or np.linalg.norm(difference_of_anchor_and_positive.detach(), axis=1) < threshold:
+        if math.copysign(1, g[0]) != 1 or np.linalg.norm(difference_of_anchor_and_positive.detach(),
+                                                         axis=1) < threshold:
             break
         anchor = np.clip(anchor, positive - EPSILON, positive + EPSILON)
     anchor = np.clip(anchor, -1, 1)
@@ -76,4 +81,5 @@ def scale(vector, alpha):
 
 
 if __name__ == '__main__':
-    Ulixes("C:\matt.jpg", 1.1)
+    # Ulixes("C:\matt.jpg", 1.1)
+    Ulixes("/Users/tamiryaari/Desktop/UNI/Year3/Workshop/Face-Cloaking-Project/server/original.jpg", 1.1)
