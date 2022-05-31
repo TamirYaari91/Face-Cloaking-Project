@@ -14,7 +14,8 @@ const uploadImageBox = document.getElementsByClassName("display_image")[0];
 const uploadImageButton = document.getElementById("uploadImageButton");
 const jsonHeaders = {
     'Content-type': 'application/json',
-    'Accept': 'application/json'}
+    'Accept': 'application/json'
+}
 const domain = "http://127.0.0.1:5000/";
 let isFileChosen = false;
 
@@ -61,7 +62,7 @@ async function postJsonToPythonAPI(domain, subdirectory, jsonBody) {
 
 async function extractPrefValueFromJsonUpdateHTML(json) {
     json = json[0];
-    console.log("Returned from Python = range+1" );
+    console.log("Returned from Python = range+1");
     console.log("prefValue = " + json.prefValue)
     // after.innerHTML +=  + "<p>";
 }
@@ -85,6 +86,7 @@ async function extractImageFromJsonAddToLocalStorage(json) {
 }
 
 function updateLoadingSection(isFileChosen) {
+    loadingMessage.style.display = "block";
     if (isFileChosen === false) {
         loadingMessage.innerHTML = "You did not choose a file.";
         loadingMessage.style.color = "red";
@@ -92,7 +94,7 @@ function updateLoadingSection(isFileChosen) {
     }
     loadingMessage.innerHTML = "Cloaking...";
     loadingMessage.style.color = "black";
-    spinner.style.display="inline-block";
+    spinner.style.display = "inline-block";
     return true;
 }
 
@@ -121,15 +123,10 @@ async function uploadImageClick() {
 
 uploadImageButton.onclick = async function () {
     let isFileUploaded = await uploadImageClick();
-
     if (isFileUploaded) {
-        await new Promise(r => setTimeout(r, 2000));
-        //TODO ^
-        // Instead of this, will need to wait for a type of signal from the server
-        // that cloaking is completed before loading results page
-
         window.open("results.html", "_blank"); //TODO - change to _self
     }
-
+    loadingMessage.style.display = "none";
+    spinner.style.display = "none";
 }
 
