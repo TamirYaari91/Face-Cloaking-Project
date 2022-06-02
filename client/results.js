@@ -38,7 +38,7 @@ function fillBoxWithImageFromJson(imageInputBase64, imageBox) {
     }
 }
 
-function displayImage(imageInputBase64) {
+function openImageInNewTab(imageInputBase64) {
     fetch(imageInputBase64).then(res => res.blob())
         .then(blob => {
             const file = new File([blob], "File name", {type: "image/jpeg"})
@@ -48,10 +48,10 @@ function displayImage(imageInputBase64) {
 }
 
 faceOffImageButton.onclick = function () {
-    displayImage(faceOffImageInputBase64)
+    openImageInNewTab(faceOffImageInputBase64)
 };
 ulixesImageButton.onclick = function () {
-    displayImage(ulixesImageInputBase64)
+    openImageInNewTab(ulixesImageInputBase64)
 }
 
 // localStorage.clear();
