@@ -1,5 +1,4 @@
 import os
-from time import sleep
 import threading
 from PIL import Image
 from flask import Flask, request, jsonify
