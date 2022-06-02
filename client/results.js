@@ -5,7 +5,6 @@ import {resizeImage} from "./shared_functions_and_consts.js";
 //endregion
 
 //region Constants
-
 const resultsFaceOffImageBox = document.getElementsByClassName("faceoff_display_image")[0];
 const resultsUlixesImageBox = document.getElementsByClassName("ulixes_display_image")[0];
 
@@ -14,18 +13,9 @@ const resultsJsonKeyToImageBoxClass = new Map();
 const faceOffImageButton = document.getElementById("faceoff_image_button");
 const ulixesImageButton = document.getElementById("ulixes_image_button");
 
-
 //endregion
 
-resultsJsonKeyToImageBoxClass.set("faceoff", resultsFaceOffImageBox);
-resultsJsonKeyToImageBoxClass.set("ulixes", resultsUlixesImageBox);
-
-let faceOffImageInputBase64 = "data:image/jpeg;base64," + localStorage.getItem("faceoff");
-let ulixesImageInputBase64 = "data:image/jpeg;base64," + localStorage.getItem("ulixes");
-
-fillBoxWithImageFromJson(faceOffImageInputBase64, resultsFaceOffImageBox);
-fillBoxWithImageFromJson(ulixesImageInputBase64, resultsUlixesImageBox);
-
+// region Functions
 function fillBoxWithImageFromJson(imageInputBase64, imageBox) {
     imageBox.style.backgroundImage = `url(${imageInputBase64})`;
     const imageIn = new Image();
@@ -46,6 +36,17 @@ function openImageInNewTab(imageInputBase64) {
             window.open(link, "_blank");
         })
 }
+
+//endregion
+
+resultsJsonKeyToImageBoxClass.set("faceoff", resultsFaceOffImageBox);
+resultsJsonKeyToImageBoxClass.set("ulixes", resultsUlixesImageBox);
+
+let faceOffImageInputBase64 = "data:image/jpeg;base64," + localStorage.getItem("faceoff");
+let ulixesImageInputBase64 = "data:image/jpeg;base64," + localStorage.getItem("ulixes");
+
+fillBoxWithImageFromJson(faceOffImageInputBase64, resultsFaceOffImageBox);
+fillBoxWithImageFromJson(ulixesImageInputBase64, resultsUlixesImageBox);
 
 faceOffImageButton.onclick = function () {
     openImageInNewTab(faceOffImageInputBase64)
