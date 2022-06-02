@@ -1,4 +1,7 @@
 import math
+import os
+from time import sleep
+
 import torch
 import torch.nn as nn
 import numpy as np
@@ -10,6 +13,8 @@ from torch import autograd
 EPSILON = 0.0001
 EMBEDDING_MODEL = InceptionResnetV1(pretrained="vggface2").eval()
 
+filename_for_perturbated_image_ulixes = "cloaked_ulixes.jpg"
+
 
 def normalize_cloaked_image_tensor(image):
     min_img = image.min()
@@ -20,7 +25,8 @@ def normalize_cloaked_image_tensor(image):
 
 
 def Ulixes(image, margin):
-    cropped_image = crop_image(image, "cropped_image.png")
+    cropped_image = crop_image(image, "cropped_image_ulixes.jpg")
+
     cloaked_image_tensor = pgd(cropped_image, margin)
     cloaked_image_array_normalized = normalize_cloaked_image_tensor(cloaked_image_tensor).detach().numpy()
 
@@ -28,7 +34,9 @@ def Ulixes(image, margin):
     cloaked_image_array_normalized = np.swapaxes(cloaked_image_array_normalized, 1, 2)  # [160, 3, 160] -> [160, 160, 3]
 
     cloaked_image = Image.fromarray(cloaked_image_array_normalized.astype(np.uint8))
-    cloaked_image.save("cloaked_image.png")
+
+    # cloaked_image.save("cloaked_image.png")
+    cloaked_image.save(filename_for_perturbated_image_ulixes)
     return cloaked_image
 
 
@@ -41,6 +49,7 @@ def crop_image(image, cropped_path):
 
 def get_embedding(image):
     return EMBEDDING_MODEL(image.unsqueeze(0))
+
 
 def pgd(image, margin=1.1, alpha=0.01):
     # margin: set to 1.1 as default, can be between [0.2, 2] to change intensity of noise masks introduced

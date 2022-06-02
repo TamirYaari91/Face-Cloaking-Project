@@ -6,27 +6,25 @@ import {resizeImage} from "./shared_functions_and_consts.js";
 
 //region Constants
 
-const resultsGrayscaleImageBox = document.getElementsByClassName("grayscale_display_image")[0];
 const resultsFaceOffImageBox = document.getElementsByClassName("faceoff_display_image")[0];
+const resultsUlixesImageBox = document.getElementsByClassName("ulixes_display_image")[0];
 
 const resultsJsonKeyToImageBoxClass = new Map();
 
-const grayscaleImageButton = document.getElementById("grayscale_image_button");
 const faceOffImageButton = document.getElementById("faceoff_image_button");
+const ulixesImageButton = document.getElementById("ulixes_image_button");
 
 
 //endregion
 
-resultsJsonKeyToImageBoxClass.set("grayscale", resultsGrayscaleImageBox);
 resultsJsonKeyToImageBoxClass.set("faceoff", resultsFaceOffImageBox);
+resultsJsonKeyToImageBoxClass.set("ulixes", resultsUlixesImageBox);
 
-let grayscaleImageInputBase64 = "data:image/jpeg;base64," + localStorage.getItem("grayscale");
 let faceOffImageInputBase64 = "data:image/jpeg;base64," + localStorage.getItem("faceoff");
+let ulixesImageInputBase64 = "data:image/jpeg;base64," + localStorage.getItem("ulixes");
 
-fillBoxWithImageFromJson(grayscaleImageInputBase64, resultsGrayscaleImageBox);
 fillBoxWithImageFromJson(faceOffImageInputBase64, resultsFaceOffImageBox);
-// TODO - this ^ will be replaced with a loop to fill all boxes?
-
+fillBoxWithImageFromJson(ulixesImageInputBase64, resultsUlixesImageBox);
 
 function fillBoxWithImageFromJson(imageInputBase64, imageBox) {
     imageBox.style.backgroundImage = `url(${imageInputBase64})`;
@@ -40,25 +38,21 @@ function fillBoxWithImageFromJson(imageInputBase64, imageBox) {
     }
 }
 
-grayscaleImageButton.onclick = function () {
-    fetch(grayscaleImageInputBase64)
-        .then(res => res.blob())
+function displayImage(imageInputBase64) {
+    fetch(imageInputBase64).then(res => res.blob())
         .then(blob => {
-            const file = new File([blob], "File name",{ type: "image/jpeg" })
+            const file = new File([blob], "File name", {type: "image/jpeg"})
             let link = URL.createObjectURL(file);
             window.open(link, "_blank");
         })
 }
 
 faceOffImageButton.onclick = function () {
-    fetch(faceOffImageInputBase64)
-        .then(res => res.blob())
-        .then(blob => {
-            const file = new File([blob], "File name",{ type: "image/jpeg" })
-            let link = URL.createObjectURL(file);
-            window.open(link, "_blank");
-        })
+    displayImage(faceOffImageInputBase64)
+};
+ulixesImageButton.onclick = function () {
+    displayImage(ulixesImageInputBase64)
 }
 
-localStorage.clear();
+// localStorage.clear();
 // TODO - Turn this ^ on after everything is done

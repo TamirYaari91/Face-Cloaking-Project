@@ -6,7 +6,8 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import base64
 from io import BytesIO
-import connect_to_uni
+import connect_to_uni as ctu
+from Ulixes import PGD
 
 # Set up Flask:
 app = Flask(__name__)
@@ -52,15 +53,17 @@ def image_base64_string_to_jpeg(im_b64, filename):
     decoder.close()
 
 
-def pil_image_make_grayscale(img):
-    return img.convert("L")
-
-
 def pil_image_to_image_base64_string(img, image_format):
     buffered = BytesIO()
     img.save(buffered, format=image_format)
     img_str = str(base64.b64encode(buffered.getvalue()), 'utf-8')
     return img_str
+
+
+def delete_all_images_from_server():
+    for file in os.listdir("."):
+        if file.endswith(".jpg") or file.endswith(".png"):
+            os.remove(file)
 
 
 @app.route("/image_receiver", methods=["POST"])
@@ -69,31 +72,37 @@ def image_handler():
     if len(data[0].keys()) == 0:  # no image uploaded
         return jsonify(success=True)  # probably needs to be different
 
+    # convert imb64 to jpeg:
     im_b64 = get_image_base64_string_from_data(data)
-    image_base64_string_to_jpeg(im_b64, connect_to_uni.filename_for_original_image)
+    image_base64_string_to_jpeg(im_b64, ctu.filename_for_original_image)
 
-    img = image_base64_string_to_pil_image(im_b64)
-    img_grayscale = pil_image_make_grayscale(img)
-    img_grayscale_b64 = pil_image_to_image_base64_string(img_grayscale, "jpeg")
+    # Create threads to run the different algorithms:
+    faceoff_thread = threading.Thread(target=ctu.faceoff_wrapper)
+    ulixes_thread = threading.Thread(target=PGD.Ulixes, args=(ctu.filename_for_original_image, 1.1))
 
-    # Perform Face-Off
-    faceoff_thread = threading.Thread(target=connect_to_uni.faceoff_wrapper)
+    # Start the threads:
     faceoff_thread.start()
+    ulixes_thread.start()
 
-    # TODO - Here ^ additional algorithms will run in separate threads
-
+    # Wait for the threads to finish:
     faceoff_thread.join()
-    img_faceoff = Image.open(os.getcwd() + '/' + connect_to_uni.filename_for_perturbated_image)
+    ulixes_thread.join()
+
+    img_faceoff = Image.open(os.getcwd() + '/' + ctu.filename_for_perturbated_image_faceoff)
+    img_ulixes = Image.open(os.getcwd() + '/' + PGD.filename_for_perturbated_image_ulixes)
+
     img_faceoff_b64 = pil_image_to_image_base64_string(img_faceoff, "jpeg")
+    img_ulixes_b64 = pil_image_to_image_base64_string(img_ulixes, "jpeg")
 
     cloaked_images_b64 = dict()
-    cloaked_images_b64["grayscale"] = img_grayscale_b64
     cloaked_images_b64["faceoff"] = img_faceoff_b64
+    cloaked_images_b64["ulixes"] = img_ulixes_b64
     cloaked_images_b64["success"] = True
 
     # sleep(3)  # imitates faceoff waiting time
 
     res = jsonify(cloaked_images_b64)
+    delete_all_images_from_server()
     return res
 
 
