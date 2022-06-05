@@ -7,7 +7,7 @@ my_password = ""  # TODO - insert password here
 nova = "nova.cs.tau.ac.il"
 c_008 = "c-008.cs.tau.ac.il"
 filename_for_original_image = "original.jpg"
-filename_for_perturbated_image = "cloaked.jpg"
+filename_for_perturbated_image_faceoff = "cloaked_faceoff.jpg"
 faceoff_basepath = "/home/sharifm/teaching/uspw-0368-3544/2022-spring/group-04/face-off/"
 filepath_for_original_image = faceoff_basepath + "data/test_imgs/myface/"
 
@@ -57,11 +57,11 @@ def delete_file_from_path(ssh_client, filepath, filename):
 
 
 faceoff_ret_val = ['Loading Images...\n',
-                    'SUCCESS! Images written to /home/sharifm/teaching/uspw-0368-3544/2022-spring/group-04/face-off/data/new_adv_imgs/cw_l2/small_center/hinge_loss/full/cw_l2_small_center_h_loss_face_pic_bill_marg_5.40_amp_2.500.png\n',
-                    'SUCCESS! Images written to /home/sharifm/teaching/uspw-0368-3544/2022-spring/group-04/face-off/data/new_adv_imgs/cw_l2/small_center/hinge_loss/crop/cw_l2_small_center_h_loss_face_pic_bill_marg_5.40_amp_2.500.png\n',
-                    'Amplifying and Writing Images----------------------5.195116334129125\n',
-                    'Saving Numpy Array---------------------------------0.01307652611285448\n',
-                    'total running time =  165.0762403011322\n']
+                   'SUCCESS! Images written to /home/sharifm/teaching/uspw-0368-3544/2022-spring/group-04/face-off/data/new_adv_imgs/cw_l2/small_center/hinge_loss/full/cw_l2_small_center_h_loss_face_pic_bill_marg_5.40_amp_2.500.png\n',
+                   'SUCCESS! Images written to /home/sharifm/teaching/uspw-0368-3544/2022-spring/group-04/face-off/data/new_adv_imgs/cw_l2/small_center/hinge_loss/crop/cw_l2_small_center_h_loss_face_pic_bill_marg_5.40_amp_2.500.png\n',
+                   'Amplifying and Writing Images----------------------5.195116334129125\n',
+                   'Saving Numpy Array---------------------------------0.01307652611285448\n',
+                   'total running time =  165.0762403011322\n']
 
 
 def connect_to_host(host, username, password, port):
@@ -75,6 +75,9 @@ def faceoff_init(host, username, password, port, command):
     # Open connection
     ssh_client = connect_to_host(host, username, password, port)
 
+    # Delete previous original image from UNI servers, if exists
+    delete_file_from_path(ssh_client, filepath_for_original_image, filename_for_original_image)
+
     # Upload original image
     upload_file_from_path(ssh_client, filepath_for_original_image + filename_for_original_image,
                           os.getcwd() + '/' + filename_for_original_image)
@@ -84,12 +87,13 @@ def faceoff_init(host, username, password, port, command):
     lines = stdout.readlines()
     # lines = faceoff_ret_val
 
-    # Delete original image
-    delete_file_from_path(ssh_client, filepath_for_original_image, filename_for_original_image)
-
     # Download cloaked image
     final_perturbation_path = get_path_to_final_perturbation(lines)
-    download_file_from_path(ssh_client, final_perturbation_path, os.getcwd() + '/' + filename_for_perturbated_image)
+    download_file_from_path(ssh_client, final_perturbation_path,
+                            os.getcwd() + '/' + filename_for_perturbated_image_faceoff)
+
+    # Delete original image from UNI servers
+    delete_file_from_path(ssh_client, filepath_for_original_image, filename_for_original_image)
 
     # Close connection
     if ssh_client is not None:
@@ -100,6 +104,5 @@ def faceoff_init(host, username, password, port, command):
 
 def faceoff_wrapper():
     return faceoff_init(c_008, my_username, my_password, ssh_port, faceoff_full_command)
-
 
 # res = faceoff_wrapper()

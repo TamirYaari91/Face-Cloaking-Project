@@ -21,6 +21,9 @@ def Ulixes(image, margin):
 
     cloaked_image = Image.fromarray(cloaked_image_array_normalized.astype(np.uint8))
     cloaked_image.save("cloaked_image.png")
+
+    # cloaked_image.save("cloaked_image.png")
+    cloaked_image.save(filename_for_perturbated_image_ulixes)
     return cloaked_image
 
 
@@ -83,3 +86,12 @@ def normalize_cloaked_image_tensor(image):
 
 if __name__ == '__main__':
     Ulixes("C:\matt.jpg", 2)
+def scale(vector, alpha):
+    inf_norm = np.linalg.norm(vector, np.inf)
+    print(vector[0].item() / inf_norm)
+    return alpha * (vector[0].detach() / inf_norm)
+
+
+if __name__ == '__main__':
+    # Ulixes("C:\matt.jpg", 1.1)
+    Ulixes("/Users/tamiryaari/Desktop/UNI/Year3/Workshop/Face-Cloaking-Project/server/original.jpg", 1.1)

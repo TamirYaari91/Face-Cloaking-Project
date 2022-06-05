@@ -1,11 +1,6 @@
-//region Imports
-
 import {resizeImage} from "./shared_functions_and_consts.js";
 
-//endregion
-
 //region Constants
-
 const prefRange = document.getElementById("prefRange");
 const loadingMessage = document.getElementById("loadingMessage");
 const spinner = document.getElementById("spinner");
@@ -18,13 +13,11 @@ const jsonHeaders = {
 }
 const domain = "http://127.0.0.1:5000/";
 let isFileChosen = false;
+let uploadImageInputBase64;
 
 //endregion
 
-let uploadImageInputBase64;
-
-localStorage.clear();
-
+// region Functions
 function fillBoxWithImageFromFile(e, imageBox) {
     const imageIn = new Image();
     imageIn.src = e.target.result;
@@ -37,19 +30,6 @@ function fillBoxWithImageFromFile(e, imageBox) {
     }
 }
 
-uploadImageInput.addEventListener("change", function () {
-    const reader = new FileReader();
-    reader.addEventListener("load", () => {
-        uploadImageInputBase64 = reader.result;
-        uploadImageBox.style.backgroundImage = `url(${uploadImageInputBase64})`;
-    });
-    reader.readAsDataURL(this.files[0]);
-    reader.onload = function (e) {
-        fillBoxWithImageFromFile(e, uploadImageBox);
-    };
-    isFileChosen = true;
-});
-
 async function postJsonToPythonAPI(domain, subdirectory, jsonBody) {
     const fullPath = domain + subdirectory;
     const fullJson = {
@@ -58,13 +38,6 @@ async function postJsonToPythonAPI(domain, subdirectory, jsonBody) {
         body: JSON.stringify(jsonBody)
     };
     return fetch(fullPath, fullJson);
-}
-
-async function extractPrefValueFromJsonUpdateHTML(json) {
-    json = json[0];
-    console.log("Returned from Python = range+1");
-    console.log("prefValue = " + json.prefValue)
-    // after.innerHTML +=  + "<p>";
 }
 
 async function extractJsonFromFetchRes(res) {
@@ -85,6 +58,14 @@ async function extractImageFromJsonAddToLocalStorage(json) {
     }
 }
 
+async function extractPrefValueFromJsonUpdateHTML(json) {
+    json = json[0];
+    console.log("Returned from Python = range+1");
+    console.log("prefValue = " + json.prefValue)
+    // after.innerHTML +=  + "<p>";
+}
+
+
 function updateLoadingSection(isFileChosen) {
     loadingMessage.style.display = "block";
     if (isFileChosen === false) {
@@ -97,7 +78,6 @@ function updateLoadingSection(isFileChosen) {
     spinner.style.display = "inline-block";
     return true;
 }
-
 
 async function uploadImageClick() {
     updateLoadingSection(isFileChosen);
@@ -120,6 +100,23 @@ async function uploadImageClick() {
     await extractImageFromJsonAddToLocalStorage(jsonFromFetchRes);
     return true;
 }
+
+// endregion
+
+localStorage.clear();
+
+uploadImageInput.addEventListener("change", function () {
+    const reader = new FileReader();
+    reader.addEventListener("load", () => {
+        uploadImageInputBase64 = reader.result;
+        uploadImageBox.style.backgroundImage = `url(${uploadImageInputBase64})`;
+    });
+    reader.readAsDataURL(this.files[0]);
+    reader.onload = function (e) {
+        fillBoxWithImageFromFile(e, uploadImageBox);
+    };
+    isFileChosen = true;
+});
 
 uploadImageButton.onclick = async function () {
     let isFileUploaded = await uploadImageClick();
