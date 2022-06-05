@@ -11,14 +11,6 @@ EPSILON = 0.0001
 EMBEDDING_MODEL = InceptionResnetV1(pretrained="vggface2").eval()
 
 
-def normalize_cloaked_image_tensor(image):
-    min_img = image.min()
-    max_img = image.max()
-    normalized_image = (image - min_img) / (max_img - min_img)
-    normalized_image *= 255.0
-    return normalized_image
-
-
 def Ulixes(image, margin):
     cropped_image = crop_image(image, "cropped_image.png")
     cloaked_image_tensor = pgd(cropped_image, margin)
@@ -39,10 +31,7 @@ def crop_image(image, cropped_path):
     return image_cropped
 
 
-def get_embedding(image):
-    return EMBEDDING_MODEL(image.unsqueeze(0))
-
-def pgd(image, margin=1.1, alpha=0.01):
+def pgd(image, margin=1.6, alpha=0.01):
     # margin: set to 1.1 as default, can be between [0.2, 2] to change intensity of noise masks introduced
     anchor = positive = image
     negative = add_epsilon_noise(image)
@@ -55,17 +44,17 @@ def pgd(image, margin=1.1, alpha=0.01):
 
     while True:
         anchor.requires_grad_()
-        loss = triplet_loss(anchor, negative, positive)
+        loss = triplet_loss(get_embedding(anchor), get_embedding(negative), get_embedding(positive))
+        print(loss)
         g = autograd.grad(loss, loss)
-        with torch.no_grad():
-            anchor = torch.add(anchor, scale(g, alpha))
+        anchor = torch.add(anchor, scale(g, alpha))
         embedded_anchor = get_embedding(anchor)
         difference_of_anchor_and_positive = embedded_anchor - embedded_positive
-        if math.copysign(1, g[0]) != 1 or np.linalg.norm(difference_of_anchor_and_positive.detach(),
-                                                         axis=1) < threshold:
+        print(np.linalg.norm(difference_of_anchor_and_positive.detach()))
+        if math.copysign(1, g[0]) != 1 or np.linalg.norm(difference_of_anchor_and_positive.detach()) > threshold:
             break
-        anchor = np.clip(anchor, positive - EPSILON, positive + EPSILON)
-    anchor = np.clip(anchor, -1, 1)
+        anchor = np.clip(anchor.detach(), positive.detach() - 0.05, positive.detach() + 0.05)
+        anchor = np.clip(anchor.detach(), -1, 1)
     return anchor
 
 
@@ -74,12 +63,23 @@ def add_epsilon_noise(image):
     return image
 
 
+def get_embedding(image):
+    return EMBEDDING_MODEL(image.unsqueeze(0))
+
+
 def scale(vector, alpha):
     inf_norm = np.linalg.norm(vector, np.inf)
-    print(vector[0].item() / inf_norm)
+    #print(vector[0].item() / inf_norm)
     return alpha * (vector[0].detach() / inf_norm)
 
 
+def normalize_cloaked_image_tensor(image):
+    min_img = image.min()
+    max_img = image.max()
+    normalized_image = (image - min_img) / (max_img - min_img)
+    normalized_image *= 255.0
+    return normalized_image
+
+
 if __name__ == '__main__':
-    # Ulixes("C:\matt.jpg", 1.1)
-    Ulixes("/Users/tamiryaari/Desktop/UNI/Year3/Workshop/Face-Cloaking-Project/server/original.jpg", 1.1)
+    Ulixes("C:\matt.jpg", 2)
