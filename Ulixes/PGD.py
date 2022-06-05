@@ -21,9 +21,7 @@ def Ulixes(image, margin):
 
     cloaked_image = Image.fromarray(cloaked_image_array_normalized.astype(np.uint8))
     cloaked_image.save("cloaked_image.png")
-
-    # cloaked_image.save("cloaked_image.png")
-    cloaked_image.save(filename_for_perturbated_image_ulixes)
+    # cloaked_image.save(filename_for_perturbated_image_ulixes)
     return cloaked_image
 
 
@@ -40,27 +38,38 @@ def pgd(image, margin=1.6, alpha=0.01):
     negative = add_epsilon_noise(image)
     negative.requires_grad_()
     positive.requires_grad_()
-    triplet_loss = nn.TripletMarginLoss(margin=margin, p=2)
+    embedded_negative = get_embedding(negative)
     embedded_positive = get_embedding(positive)
-
-    threshold = 0.01
+    distance_positive_negative = np.linalg.norm(embedded_positive.detach() - embedded_negative.detach())
+    #triplet_loss = nn.TripletMarginLoss(margin=margin, p=2)
+    threshold = 0.001
+    count = 0
 
     while True:
+        print(count)
         anchor.requires_grad_()
-        loss = triplet_loss(get_embedding(anchor), get_embedding(negative), get_embedding(positive))
-        print(loss)
-        g = autograd.grad(loss, loss)
-        anchor = torch.add(anchor, scale(g, alpha))
         embedded_anchor = get_embedding(anchor)
-        difference_of_anchor_and_positive = embedded_anchor - embedded_positive
-        print(np.linalg.norm(difference_of_anchor_and_positive.detach()))
-        if math.copysign(1, g[0]) != 1 or np.linalg.norm(difference_of_anchor_and_positive.detach()) > threshold:
+        loss_number = get_loss(embedded_anchor, embedded_positive, distance_positive_negative, margin)
+        loss = torch.as_tensor(loss_number)
+        loss.requires_grad_()
+        print(f"loss is: {loss_number}")
+        g = autograd.grad(loss, loss)
+        prev_anchor = anchor
+        anchor = torch.add(anchor, scale(g, alpha))
+        difference_of_prev_anchor_and_new_anchor = np.linalg.norm(get_embedding(anchor).detach() - get_embedding(prev_anchor).detach())
+        print(f"new noise is: {difference_of_prev_anchor_and_new_anchor}")
+        #if math.copysign(1, np.linalg.norm(loss.detach().numpy(), np.inf)) != 1 or difference_of_prev_anchor_and_new_anchor < threshold:
+        if difference_of_prev_anchor_and_new_anchor < threshold or count == 100:
             break
-        anchor = np.clip(anchor.detach(), positive.detach() - 0.05, positive.detach() + 0.05)
+        anchor = np.clip(anchor.detach(), positive.detach() - 0.5, positive.detach() + 0.5)
         anchor = np.clip(anchor.detach(), -1, 1)
+        count += 1
     return anchor
 
 
+def get_loss(anchor, positive, const_distance_positive_negative, margin):
+    distance_anchor_positive = np.linalg.norm(anchor.detach() - positive.detach())
+    return distance_anchor_positive - const_distance_positive_negative + margin
 def add_epsilon_noise(image):
     image = torch.add(image, EPSILON)
     return image
@@ -85,13 +94,4 @@ def normalize_cloaked_image_tensor(image):
 
 
 if __name__ == '__main__':
-    Ulixes("C:\matt.jpg", 2)
-def scale(vector, alpha):
-    inf_norm = np.linalg.norm(vector, np.inf)
-    print(vector[0].item() / inf_norm)
-    return alpha * (vector[0].detach() / inf_norm)
-
-
-if __name__ == '__main__':
-    # Ulixes("C:\matt.jpg", 1.1)
-    Ulixes("/Users/tamiryaari/Desktop/UNI/Year3/Workshop/Face-Cloaking-Project/server/original.jpg", 1.1)
+    Ulixes("C:\matt.jpg", 0.8)
