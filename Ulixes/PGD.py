@@ -9,6 +9,7 @@ from torch import autograd
 
 EPSILON = 0.0001
 EMBEDDING_MODEL = InceptionResnetV1(pretrained="vggface2").eval()
+filename_for_perturbated_image_ulixes = "cloaked_ulixes.jpg"
 
 
 def Ulixes(image, margin):
