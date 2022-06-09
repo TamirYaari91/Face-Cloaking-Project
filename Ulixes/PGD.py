@@ -21,8 +21,8 @@ def Ulixes(image, margin):
     cloaked_image_array_normalized = np.swapaxes(cloaked_image_array_normalized, 1, 2)  # [160, 3, 160] -> [160, 160, 3]
 
     cloaked_image = Image.fromarray(cloaked_image_array_normalized.astype(np.uint8))
-    cloaked_image.save("cloaked_image.png")
-    # cloaked_image.save(filename_for_perturbated_image_ulixes)
+    # cloaked_image.save("cloaked_image.png")
+    cloaked_image.save(filename_for_perturbated_image_ulixes)
     return cloaked_image
 
 
@@ -47,18 +47,18 @@ def pgd(image, margin=1.6, alpha=0.01):
     count = 0
 
     while True:
-        print(count)
+        # print(count)
         anchor.requires_grad_()
         embedded_anchor = get_embedding(anchor)
         loss_number = get_loss(embedded_anchor, embedded_positive, distance_positive_negative, margin)
         loss = torch.as_tensor(loss_number)
         loss.requires_grad_()
-        print(f"loss is: {loss_number}")
+        # print(f"loss is: {loss_number}")
         g = autograd.grad(loss, loss)
         prev_anchor = anchor
         anchor = torch.add(anchor, scale(g, alpha))
         difference_of_prev_anchor_and_new_anchor = np.linalg.norm(get_embedding(anchor).detach() - get_embedding(prev_anchor).detach())
-        print(f"new noise is: {difference_of_prev_anchor_and_new_anchor}")
+        # print(f"new noise is: {difference_of_prev_anchor_and_new_anchor}")
         #if math.copysign(1, np.linalg.norm(loss.detach().numpy(), np.inf)) != 1 or difference_of_prev_anchor_and_new_anchor < threshold:
         if difference_of_prev_anchor_and_new_anchor < threshold or count == 100:
             break

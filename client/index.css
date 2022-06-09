@@ -22,8 +22,16 @@ body {
     }
 }
 
+.headline {
+    display: flex;
+    align-items: center;
+    padding-left: 40%;
+    padding-bottom: 5%;
+}
+
 .page_header {
     text-align: center;
+    padding-right: 10px;
 }
 
 .general_description {

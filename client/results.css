@@ -19,9 +19,16 @@ body {
         background-position: 0 50%;
     }
 }
+.headline {
+    display: flex;
+    align-items: center;
+    padding-left: 35%;
+    padding-bottom: 5%;
+}
 
 .results_page_header {
     text-align: center;
+    padding-right: 10px;
 }
 
 .output_display_images:hover{
