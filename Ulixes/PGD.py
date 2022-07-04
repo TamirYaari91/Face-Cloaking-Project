@@ -10,7 +10,7 @@ from torch import autograd
 EPSILON = 0.0001
 EMBEDDING_MODEL = InceptionResnetV1(pretrained="vggface2").eval()
 filename_for_original_image_cropped = "cropped_original.jpg"
-filename_for_perturbated_image_ulixes = "cloaked_cropped_ulixes.png" # TODO - can change to jpg?
+filename_for_perturbated_image_ulixes = "cloaked_cropped_ulixes.jpg" # TODO - need to be png?
 
 
 def Ulixes(image, margin):

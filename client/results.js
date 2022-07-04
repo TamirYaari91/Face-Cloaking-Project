@@ -5,13 +5,14 @@ import {resizeImage} from "./shared_functions_and_consts.js";
 //endregion
 
 //region Constants
+
 const resultsFaceOffImageBox = document.getElementsByClassName("faceoff_display_image")[0];
 const resultsUlixesImageBox = document.getElementsByClassName("ulixes_display_image")[0];
-
 const resultsJsonKeyToImageBoxClass = new Map();
-
 const faceOffImageButton = document.getElementById("faceoff_image_button");
 const ulixesImageButton = document.getElementById("ulixes_image_button");
+const faceOffDSSIMTextBox = document.getElementById("faceoff_dssim");
+const ulixesDSSIMTextBox = document.getElementById("ulixes_dssim");
 
 //endregion
 
@@ -42,11 +43,16 @@ function openImageInNewTab(imageInputBase64) {
 resultsJsonKeyToImageBoxClass.set("faceoff", resultsFaceOffImageBox);
 resultsJsonKeyToImageBoxClass.set("ulixes", resultsUlixesImageBox);
 
-let faceOffImageInputBase64 = "data:image/jpeg;base64," + localStorage.getItem("faceoff");
-let ulixesImageInputBase64 = "data:image/jpeg;base64," + localStorage.getItem("ulixes");
+let faceOffImageInputBase64 = "data:image/jpeg;base64," + localStorage.getItem("faceoff_image");
+let ulixesImageInputBase64 = "data:image/jpeg;base64," + localStorage.getItem("ulixes_image");
+let faceOffDSSIM = "DSSIM: " + localStorage.getItem("faceoff_dssim");
+let ulixesDSSIM = "DSSIM: " + localStorage.getItem("ulixes_dssim");
 
 fillBoxWithImageFromJson(faceOffImageInputBase64, resultsFaceOffImageBox);
 fillBoxWithImageFromJson(ulixesImageInputBase64, resultsUlixesImageBox);
+faceOffDSSIMTextBox.innerHTML = faceOffDSSIM;
+ulixesDSSIMTextBox.innerHTML = ulixesDSSIM;
+
 
 faceOffImageButton.onclick = function () {
     openImageInNewTab(faceOffImageInputBase64)

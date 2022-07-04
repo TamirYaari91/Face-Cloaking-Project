@@ -7,7 +7,6 @@ import base64
 from io import BytesIO
 import connect_to_uni as ctu
 from Ulixes import PGD
-from subprocess import call
 
 # Set up Flask:
 app = Flask(__name__)
@@ -67,11 +66,17 @@ def delete_all_images_from_server():
 
 
 def calc_dssim_faceoff():
-    return call(["dssim", ctu.filename_for_original_image, ctu.filename_for_perturbated_image_faceoff])
+    command = "dssim " + ctu.filename_for_original_image + " " + ctu.filename_for_perturbated_image_faceoff
+    output = os.popen(command).read()
+    output = [val.strip() for val in output.split('\t')]
+    return output[0]
 
 
 def calc_dssim_ulixes():
-    return call(["dssim", PGD.filename_for_original_image_cropped, ctu.filename_for_perturbated_image_faceoff])
+    command = "dssim " + PGD.filename_for_original_image_cropped + " " + PGD.filename_for_perturbated_image_ulixes
+    output = os.popen(command).read()
+    output = [val.strip() for val in output.split('\t')]
+    return output[0]
 
 
 # TODO - Faceoff calculates DSSIM on entire image, Ulixes only on cropped face - change to entire image when possible
@@ -106,8 +111,10 @@ def image_handler():
     img_ulixes_b64 = pil_image_to_image_base64_string(img_ulixes, "jpeg")
 
     cloaked_images_b64 = dict()
-    cloaked_images_b64["faceoff"] = img_faceoff_b64
-    cloaked_images_b64["ulixes"] = img_ulixes_b64
+    cloaked_images_b64["faceoff_image"] = img_faceoff_b64
+    cloaked_images_b64["ulixes_image"] = img_ulixes_b64
+    cloaked_images_b64["faceoff_dssim"] = calc_dssim_faceoff()
+    cloaked_images_b64["ulixes_dssim"] = calc_dssim_ulixes()
     cloaked_images_b64["success"] = True
 
     # sleep(3)  # imitates faceoff waiting time
