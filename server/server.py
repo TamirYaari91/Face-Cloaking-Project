@@ -7,6 +7,7 @@ import base64
 from io import BytesIO
 import connect_to_uni as ctu
 from Ulixes import PGD
+from subprocess import call
 
 # Set up Flask:
 app = Flask(__name__)
@@ -63,6 +64,17 @@ def delete_all_images_from_server():
     for file in os.listdir("."):
         if file.endswith(".jpg") or file.endswith(".png"):
             os.remove(file)
+
+
+def calc_dssim_faceoff():
+    return call(["dssim", ctu.filename_for_original_image, ctu.filename_for_perturbated_image_faceoff])
+
+
+def calc_dssim_ulixes():
+    return call(["dssim", PGD.filename_for_original_image_cropped, ctu.filename_for_perturbated_image_faceoff])
+
+
+# TODO - Faceoff calculates DSSIM on entire image, Ulixes only on cropped face - change to entire image when possible
 
 
 @app.route("/image_receiver", methods=["POST"])

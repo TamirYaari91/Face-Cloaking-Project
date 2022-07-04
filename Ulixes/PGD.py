@@ -9,11 +9,12 @@ from torch import autograd
 
 EPSILON = 0.0001
 EMBEDDING_MODEL = InceptionResnetV1(pretrained="vggface2").eval()
-filename_for_perturbated_image_ulixes = "cloaked_ulixes.jpg"
+filename_for_original_image_cropped = "cropped_original.jpg"
+filename_for_perturbated_image_ulixes = "cloaked_cropped_ulixes.png" # TODO - can change to jpg?
 
 
 def Ulixes(image, margin):
-    cropped_image = crop_image(image, "cropped_image.png")
+    cropped_image = crop_image(image, filename_for_original_image_cropped)
     cloaked_image_tensor = pgd(cropped_image, margin)
     cloaked_image_array_normalized = normalize_cloaked_image_tensor(cloaked_image_tensor).detach().numpy()
 
@@ -42,7 +43,7 @@ def pgd(image, margin=1.6, alpha=0.01):
     embedded_negative = get_embedding(negative)
     embedded_positive = get_embedding(positive)
     distance_positive_negative = np.linalg.norm(embedded_positive.detach() - embedded_negative.detach())
-    #triplet_loss = nn.TripletMarginLoss(margin=margin, p=2)
+    # triplet_loss = nn.TripletMarginLoss(margin=margin, p=2)
     threshold = 0.001
     count = 0
 
@@ -57,9 +58,10 @@ def pgd(image, margin=1.6, alpha=0.01):
         g = autograd.grad(loss, loss)
         prev_anchor = anchor
         anchor = torch.add(anchor, scale(g, alpha))
-        difference_of_prev_anchor_and_new_anchor = np.linalg.norm(get_embedding(anchor).detach() - get_embedding(prev_anchor).detach())
+        difference_of_prev_anchor_and_new_anchor = np.linalg.norm(
+            get_embedding(anchor).detach() - get_embedding(prev_anchor).detach())
         # print(f"new noise is: {difference_of_prev_anchor_and_new_anchor}")
-        #if math.copysign(1, np.linalg.norm(loss.detach().numpy(), np.inf)) != 1 or difference_of_prev_anchor_and_new_anchor < threshold:
+        # if math.copysign(1, np.linalg.norm(loss.detach().numpy(), np.inf)) != 1 or difference_of_prev_anchor_and_new_anchor < threshold:
         if difference_of_prev_anchor_and_new_anchor < threshold or count == 100:
             break
         anchor = np.clip(anchor.detach(), positive.detach() - 0.5, positive.detach() + 0.5)
@@ -71,6 +73,8 @@ def pgd(image, margin=1.6, alpha=0.01):
 def get_loss(anchor, positive, const_distance_positive_negative, margin):
     distance_anchor_positive = np.linalg.norm(anchor.detach() - positive.detach())
     return distance_anchor_positive - const_distance_positive_negative + margin
+
+
 def add_epsilon_noise(image):
     image = torch.add(image, EPSILON)
     return image
@@ -82,7 +86,7 @@ def get_embedding(image):
 
 def scale(vector, alpha):
     inf_norm = np.linalg.norm(vector, np.inf)
-    #print(vector[0].item() / inf_norm)
+    # print(vector[0].item() / inf_norm)
     return alpha * (vector[0].detach() / inf_norm)
 
 
