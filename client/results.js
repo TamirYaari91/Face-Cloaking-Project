@@ -45,8 +45,8 @@ resultsJsonKeyToImageBoxClass.set("ulixes", resultsUlixesImageBox);
 
 let faceOffImageInputBase64 = "data:image/jpeg;base64," + localStorage.getItem("faceoff_image");
 let ulixesImageInputBase64 = "data:image/jpeg;base64," + localStorage.getItem("ulixes_image");
-let faceOffDSSIM = "DSSIM: " + localStorage.getItem("faceoff_dssim");
-let ulixesDSSIM = "DSSIM: " + localStorage.getItem("ulixes_dssim");
+let faceOffDSSIM = "<b>DSSIM:</b> " + localStorage.getItem("faceoff_dssim");
+let ulixesDSSIM = "<b>DSSIM:</b> " + localStorage.getItem("ulixes_dssim");
 
 fillBoxWithImageFromJson(faceOffImageInputBase64, resultsFaceOffImageBox);
 fillBoxWithImageFromJson(ulixesImageInputBase64, resultsUlixesImageBox);
