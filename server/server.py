@@ -65,6 +65,13 @@ def delete_all_images_from_server():
             os.remove(file)
 
 
+def calc_dssim_original():
+    command = "dssim " + ctu.filename_for_original_image + " " + ctu.filename_for_original_image
+    output = os.popen(command).read()
+    output = [val.strip() for val in output.split('\t')]
+    return output[0]
+
+
 def calc_dssim_faceoff():
     command = "dssim " + ctu.filename_for_original_image + " " + ctu.filename_for_perturbated_image_faceoff
     output = os.popen(command).read()
@@ -89,8 +96,8 @@ def image_handler():
         return jsonify(success=True)  # probably needs to be different
 
     # convert imb64 to jpeg:
-    im_b64 = get_image_base64_string_from_data(data)
-    image_base64_string_to_jpeg(im_b64, ctu.filename_for_original_image)
+    img_original_b64 = get_image_base64_string_from_data(data)
+    image_base64_string_to_jpeg(img_original_b64, ctu.filename_for_original_image)
 
     # Create threads to run the different algorithms:
     faceoff_thread = threading.Thread(target=ctu.faceoff_wrapper)
@@ -111,8 +118,10 @@ def image_handler():
     img_ulixes_b64 = pil_image_to_image_base64_string(img_ulixes, "jpeg")
 
     cloaked_images_b64 = dict()
+    cloaked_images_b64["original_image"] = img_original_b64
     cloaked_images_b64["faceoff_image"] = img_faceoff_b64
     cloaked_images_b64["ulixes_image"] = img_ulixes_b64
+    cloaked_images_b64["original_dssim"] = calc_dssim_original()
     cloaked_images_b64["faceoff_dssim"] = calc_dssim_faceoff()
     cloaked_images_b64["ulixes_dssim"] = calc_dssim_ulixes()
     cloaked_images_b64["success"] = True
