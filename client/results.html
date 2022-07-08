@@ -6,17 +6,35 @@
     <link rel="stylesheet" href="results.css">
 </head>
 <body>
-<div class = "headline">
-    <h1 class = "results_page_header">Cloak Your Face - Results</h1>
-    <object data="logo.svg" width="5%" height="5%"> </object>
+<div class="headline">
+    <h1 class="results_page_header">Cloak Your Face - Results</h1>
+    <object data="logo.svg" width="5%" height="5%"></object>
+</div>
+<div class="legend">
+    <p>
+        <mark class="red">DSSIM</mark>
+        represents the dissimilarity between two images using an
+        algorithm approximating human vision. Here, It is calculated on the original and the cloaked image. The lower
+        the score, the more identical the images look to the naked eye.
+    </p>
+
+    <p>
+        <mark class="red">Evasiveness</mark>
+        represents how much this algorithm, with the specified Usability vs. Privacy input parameter given, was able to
+        evade detection by face recognition networks. Your image was not added to this kind of network! this score was
+        calculated and tested using a known dataset of celebrity images.
+    </p>
+
 </div>
 <div class="image_containers">
     <div class="faceoff_image_container image_container">
         <h3 id="faceoff_image_container_header image_container_header">Faceoff</h3>
-        <button id="faceoff_image_button" type="button" class="output_display_images faceoff_display_image display_image">
+        <button id="faceoff_image_button" type="button"
+                class="output_display_images faceoff_display_image display_image">
         </button>
         <div class="scores_container faceoff_scores_container">
             <p id="faceoff_dssim" class="dssim"></p>
+            <p id="faceoff_evasiveness" class="evasiveness"></p>
         </div>
     </div>
     <div class="ulixes_image_container image_container">
@@ -25,7 +43,8 @@
         </button>
         <div class="scores_container ulixes_scores_container">
             <p id="ulixes_dssim" class="dssim"></p>
-<!--            <p id="ulixes_image_desc2 image_desc2">TBD - full obfuscated image</p>-->
+            <p id="ulixes_evasiveness" class="evasiveness"></p>
+            <!--            <p id="ulixes_image_desc2 image_desc2">TBD - full obfuscated image</p>-->
         </div>
     </div>
 </div>

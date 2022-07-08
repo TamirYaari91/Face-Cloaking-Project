@@ -23,12 +23,16 @@ body {
     display: flex;
     align-items: center;
     padding-left: 35%;
-    padding-bottom: 5%;
 }
 
 .results_page_header {
     text-align: center;
     padding-right: 10px;
+}
+
+.legend {
+    text-align: left;
+    padding-bottom: 5%;
 }
 
 .output_display_images:hover{
@@ -62,4 +66,9 @@ body {
 
 .scores_container{
     padding-bottom: 10px;
+}
+
+mark.red {
+    color:#ff0000;
+    background: none;
 }
