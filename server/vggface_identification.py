@@ -1,12 +1,12 @@
 # Example of face detection with a vggface2 model
-from numpy import expand_dims
-from matplotlib import pyplot
 from PIL import Image
-from numpy import asarray
-from mtcnn.mtcnn import MTCNN
-from keras_vggface.vggface import VGGFace
 from keras_vggface.utils import preprocess_input
 from keras_vggface.utils import decode_predictions
+from keras_vggface.vggface import VGGFace
+from matplotlib import pyplot
+from mtcnn.mtcnn import MTCNN
+from numpy import asarray
+from numpy import expand_dims
 
 
 # extract a single face from a given photograph
@@ -30,7 +30,7 @@ def extract_face(filename, required_size=(224, 224)):
 
 
 # load the photo and extract the face
-pixels = extract_face('cloaked_faceoff.jpg')
+pixels = extract_face("C:/Ulixes/cloaked_cropped_ulixes.jpg")
 # convert one face into samples
 pixels = pixels.astype('float32')
 samples = expand_dims(pixels, axis=0)
