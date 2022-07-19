@@ -4,7 +4,6 @@ import numpy as np
 from facenet_pytorch.models.mtcnn import MTCNN
 from facenet_pytorch.models.inception_resnet_v1 import InceptionResnetV1
 from PIL import Image
-from torch.autograd import grad
 
 EPSILON = 0.0001
 EMBEDDING_MODEL = InceptionResnetV1(pretrained="vggface2").eval()
@@ -43,11 +42,9 @@ def pgd(image, margin=1.6, alpha=0.01):
     positive = image
     negative = add_epsilon_noise(image)
 
-    adv_triplet_margin_loss = nn.TripletMarginLoss(margin)
+    adv_triplet_margin_loss = nn.TripletMarginWithDistanceLoss(distance_function=distance_function, margin=margin)
 
-    embedded_anchor = torch.autograd.Variable(get_embedding(anchor))
-    embedded_negative = torch.autograd.Variable(get_embedding(negative), requires_grad=True)
-    embedded_positive = torch.autograd.Variable(get_embedding(positive))
+    negative = torch.autograd.Variable(negative, requires_grad=True)
 
     threshold = 0.01
     epochs = 100
@@ -56,22 +53,24 @@ def pgd(image, margin=1.6, alpha=0.01):
 
     for i in range(epochs):
 
-        loss = adv_triplet_margin_loss(embedded_positive, embedded_anchor, embedded_negative)
+        loss = adv_triplet_margin_loss(positive, anchor, negative)
         loss.backward()
-        gradient = (- 1) * embedded_negative.grad  # After checking the loss gradient calculation I think we need this
+        gradient = (- 1) * negative.grad
 
-        new_noise = scale(gradient[0], alpha)
+        new_noise = scale(gradient, alpha)
         noise_mask += new_noise  # obtaining total noise added
 
-        embedded_negative.grad.zero_()
+        negative.grad.zero_()
 
-        anchor = torch.add(embedded_anchor, new_noise)
+        prev_anchor = anchor
 
-        difference_of_prev_anchor_and_new_anchor = np.linalg.norm(anchor.data - embedded_anchor.data)
+        anchor = torch.add(anchor, new_noise)
+
+        difference_of_prev_anchor_and_new_anchor = np.linalg.norm(get_embedding(anchor) - get_embedding(prev_anchor))
         if difference_of_prev_anchor_and_new_anchor < threshold:
             break
 
-        anchor = np.clip(anchor.detach(), embedded_positive.detach() - 0.5, embedded_positive.detach() + 0.5)
+        anchor = np.clip(anchor.detach(), positive.detach() - 0.5, positive.detach() + 0.5)
         anchor = np.clip(anchor, -1, 1)
 
         embedded_anchor = anchor
@@ -114,5 +113,11 @@ def normalize_cloaked_image_tensor(image):
     return normalized_image
 
 
+def distance_function(vector1, vector2):
+    vector1_embedded = get_embedding(vector1)
+    vector2_embedded = get_embedding(vector2)
+    return torch.tensor(np.linalg.norm(vector1_embedded.detach() - vector2_embedded.detach()), requires_grad=True)
+
+
 if __name__ == '__main__':
-    Ulixes("C:\matt.jpg", 1.1)
+    Ulixes("/Users/yarden.benbassat/Desktop/Matt Damon.jpeg", 1.1)
