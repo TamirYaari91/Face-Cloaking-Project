@@ -8,24 +8,23 @@ from PIL import Image
 EPSILON = 0.0001
 EMBEDDING_MODEL = InceptionResnetV1(pretrained="vggface2").eval()
 filename_for_original_image_cropped = "cropped_original.jpg"
-filename_for_perturbated_image_ulixes = "cloaked_cropped_ulixes.jpg" # TODO - need to be png?
+filename_for_perturbated_image_ulixes = "cloaked_cropped_ulixes.jpg"  # TODO - need to be png?
 
 
 def Ulixes(image, margin):
     cropped_image = crop_image(image, filename_for_original_image_cropped)
     noise_mask = pgd(cropped_image, margin) # PGD
 
-    # TODO: un_comment those lines and understand how to take the (1,512) dimensions noise and turn it into (160, 160, 3) dimensions matrix
-    # cropped_image_with_mask = add_noise_mask(cropped_image, noise_mask)
-    # cloaked_image_array_normalized = normalize_cloaked_image_tensor(cropped_image_with_mask)
+    cropped_image_with_mask = add_noise_mask(cropped_image, noise_mask)
+    cloaked_image_normalized = normalize_cloaked_image_tensor(cropped_image_with_mask)
     #
-    # cloaked_image_array_normalized = np.swapaxes(cloaked_image_array_normalized, 0, 1)  # [3, 160, 160] -> [160, 3, 160]
-    # cloaked_image_array_normalized = np.swapaxes(cloaked_image_array_normalized, 1, 2)  # [160, 3, 160] -> [160, 160, 3]
+    cloaked_image_array_normalized = cloaked_image_normalized.detach().numpy()
+    cloaked_image_array_normalized = np.swapaxes(cloaked_image_array_normalized, 0, 1)  # [3, 160, 160] -> [160, 3, 160]
+    cloaked_image_array_normalized = np.swapaxes(cloaked_image_array_normalized, 1, 2)  # [160, 3, 160] -> [160, 160, 3]
     #
-    # cloaked_image = Image.fromarray(np.array(cloaked_image_array_normalized).astype(np.uint8))
-    # cloaked_image.save(filename_for_perturbated_image_ulixes)
-    # return cloaked_image
-    return
+    cloaked_image = Image.fromarray(cloaked_image_array_normalized.astype(np.uint8))
+    cloaked_image.save(filename_for_perturbated_image_ulixes)
+    return cloaked_image
 
 
 def crop_image(image, cropped_path):
@@ -35,55 +34,42 @@ def crop_image(image, cropped_path):
     return image_cropped
 
 
-def pgd(image, margin=1.6, alpha=0.01):
+def pgd(image, margin=1.1, alpha=8/255):
     # margin: set to 1.1 as default, can be between [0.2, 2] to change intensity of noise masks introduced
 
     anchor = image
     positive = image
     negative = add_epsilon_noise(image)
-
-    adv_triplet_margin_loss = nn.TripletMarginWithDistanceLoss(distance_function=distance_function, margin=margin)
-
-    negative = torch.autograd.Variable(negative, requires_grad=True)
+    adv_triplet_margin_loss = nn.TripletMarginLoss(margin=margin)
 
     threshold = 0.01
-    epochs = 100
-
-    noise_mask = 0
+    epochs = 150
+    noise_mask = 0.0
 
     for i in range(epochs):
 
-        loss = adv_triplet_margin_loss(positive, anchor, negative)
+        anchor.requires_grad = True
+        loss = adv_triplet_margin_loss(get_embedding(positive), get_embedding(anchor), get_embedding(negative))
         loss.backward()
-        gradient = (- 1) * negative.grad
+        gradient = anchor.grad
 
         new_noise = scale(gradient, alpha)
         noise_mask += new_noise  # obtaining total noise added
 
-        negative.grad.zero_()
-
         prev_anchor = anchor
-
         anchor = torch.add(anchor, new_noise)
 
-        difference_of_prev_anchor_and_new_anchor = np.linalg.norm(get_embedding(anchor) - get_embedding(prev_anchor))
+        difference_of_prev_anchor_and_new_anchor = np.linalg.norm(get_embedding(anchor).detach() - get_embedding(prev_anchor).detach())
+        print(f"distance from embeddings of current noisy anchor and last noisy anchor: {difference_of_prev_anchor_and_new_anchor}")
         if difference_of_prev_anchor_and_new_anchor < threshold:
             break
 
         anchor = np.clip(anchor.detach(), positive.detach() - 0.5, positive.detach() + 0.5)
         anchor = np.clip(anchor, -1, 1)
 
-        embedded_anchor = anchor
-
         print(f"Epoch {i}/{epochs}: Loss: {loss}")
 
-    anchor = torch.add(embedded_anchor, noise_mask)
     return noise_mask
-
-
-def get_loss(anchor, positive, const_distance_positive_negative, margin):
-    distance_anchor_positive = np.linalg.norm(anchor.detach() - positive.detach())
-    return distance_anchor_positive - const_distance_positive_negative + margin
 
 
 def add_epsilon_noise(image):
@@ -100,9 +86,10 @@ def get_embedding(image):
     return EMBEDDING_MODEL(image.unsqueeze(0))
 
 
-def scale(vector, alpha):
-    inf_norm = np.linalg.norm(vector, np.inf)
-    return (vector.data / inf_norm).data * alpha
+def scale(matrix, alpha):
+    abs_matrix = torch.abs(matrix)
+    inf_norm = torch.max(torch.linalg.matrix_norm(abs_matrix, ord=2))
+    return torch.mul(torch.div(matrix, inf_norm), alpha)
 
 
 def normalize_cloaked_image_tensor(image):
@@ -113,11 +100,5 @@ def normalize_cloaked_image_tensor(image):
     return normalized_image
 
 
-def distance_function(vector1, vector2):
-    vector1_embedded = get_embedding(vector1)
-    vector2_embedded = get_embedding(vector2)
-    return torch.tensor(np.linalg.norm(vector1_embedded.detach() - vector2_embedded.detach()), requires_grad=True)
-
-
 if __name__ == '__main__':
-    Ulixes("/Users/yarden.benbassat/Desktop/Matt Damon.jpeg", 1.1)
+    Ulixes("C:\matt.jpg", 1.1)
