@@ -1,5 +1,10 @@
 # Example of face detection with a vggface2 model
+from mtcnn.mtcnn import MTCNN
+from numpy import expand_dims
+from matplotlib import pyplot
 from PIL import Image
+from numpy import asarray
+from keras_vggface.vggface import VGGFace
 from keras_vggface.utils import preprocess_input
 from keras_vggface.utils import decode_predictions
 from keras_vggface.vggface import VGGFace

@@ -1,3 +1,4 @@
+import http
 import os
 import threading
 from PIL import Image
@@ -14,23 +15,25 @@ app = Flask(__name__)
 # Set up Flask to bypass CORS:
 cors = CORS(app)
 
+input_params = dict()
+
 
 @app.route("/params_receiver", methods=["POST"])
 def params_handler():
     data = request.get_json()
-    data = inc_all_fields_by_one(data)
-    header = data.headers
-    header['Access-Control-Allow-Origin'] = '*'
-    return data
-
-
-def inc_all_fields_by_one(data):
     inputs_json = data[0]
-    for key in inputs_json.keys():
-        inputs_json[key] += 1
-    output = [inputs_json]
-    res = jsonify(output)
-    return res
+    input_param = int(list(inputs_json.values())[0])
+    input_params["ulixes"] = set_input_param_in_ulixes(input_param)
+
+    print("ulixes param = " + str(input_params["ulixes"]))
+
+    return '', http.HTTPStatus.OK
+
+
+def set_input_param_in_ulixes(input_param):
+    # input param is in range of [1,9] and ulixes param needs to be in [0.2,2]
+    min_value = 0.2
+    return min_value + 0.225 * (input_param - 1)
 
 
 def get_image_base64_string_from_data(data):
@@ -101,7 +104,7 @@ def image_handler():
 
     # Create threads to run the different algorithms:
     faceoff_thread = threading.Thread(target=ctu.faceoff_wrapper)
-    ulixes_thread = threading.Thread(target=PGD.Ulixes, args=(ctu.filename_for_original_image, 1.1))
+    ulixes_thread = threading.Thread(target=PGD.Ulixes, args=(ctu.filename_for_original_image, input_params["ulixes"]))
 
     # Start the threads:
     faceoff_thread.start()
@@ -111,10 +114,10 @@ def image_handler():
     faceoff_thread.join()
     ulixes_thread.join()
 
-    img_faceoff = Image.open(os.getcwd() + '/' + ctu.filename_for_perturbated_image_faceoff)
+    # img_faceoff = Image.open(os.getcwd() + '/' + ctu.filename_for_perturbated_image_faceoff)
     img_ulixes = Image.open(os.getcwd() + '/' + PGD.filename_for_perturbated_image_ulixes)
 
-    img_faceoff_b64 = pil_image_to_image_base64_string(img_faceoff, "jpeg")
+    # img_faceoff_b64 = pil_image_to_image_base64_string(img_faceoff, "jpeg")
     img_ulixes_b64 = pil_image_to_image_base64_string(img_ulixes, "jpeg")
 
     cloaked_images_b64 = dict()

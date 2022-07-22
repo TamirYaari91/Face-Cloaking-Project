@@ -88,15 +88,15 @@ async function uploadImageClick() {
     let jsonBody = [
         {"prefValue": parseInt(prefRange.value)}];
 
-    let fetchRes = await postJsonToPythonAPI(domain, "params_receiver", jsonBody);
-    let jsonFromFetchRes = await extractJsonFromFetchRes(fetchRes);
-    await extractPrefValueFromJsonUpdateHTML(jsonFromFetchRes);
+    await postJsonToPythonAPI(domain, "params_receiver", jsonBody);
+    // let jsonFromFetchRes = await extractJsonFromFetchRes(fetchRes);
+    // await extractPrefValueFromJsonUpdateHTML(jsonFromFetchRes);
 
     jsonBody = [
         {"imageData": uploadImageInputBase64}];
 
-    fetchRes = await postJsonToPythonAPI(domain, "image_receiver", jsonBody);
-    jsonFromFetchRes = await extractJsonFromFetchRes(fetchRes);
+    let fetchRes = await postJsonToPythonAPI(domain, "image_receiver", jsonBody);
+    let jsonFromFetchRes = await extractJsonFromFetchRes(fetchRes);
     await extractImageFromJsonAddToLocalStorage(jsonFromFetchRes);
     return true;
 }
