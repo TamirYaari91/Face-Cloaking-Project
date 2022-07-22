@@ -13,7 +13,7 @@ def bounding_box_detector(path):
     results = detector.detect_faces(pixels)
     # extract the bounding box from the first face
     x1, y1, width, height = results[0]['box']
-    merge_perturbated_image_with_original_image("C:\ImagesForTesting\shai_cloaked.jpg", path, x1, y1, width, height)
+    merge_perturbated_image_with_original_image("/Users/yarden.benbassat/Desktop/Images-for-face-cloaking/Ben Stiller cloaked cropped.jpg", path, x1, y1, width, height)
 
 
 def merge_perturbated_image_with_original_image(perturbated_path, original_image_path, x1, y1, width, height):
@@ -28,10 +28,10 @@ def merge_perturbated_image_with_original_image(perturbated_path, original_image
     # normalized_original_image_array = normalize_cloaked_image_tensor(original_image_array)
     image = Image.fromarray(original_image_array.astype(np.uint8))
     # face_array = Image.fromarray(image).astype(np.uint8)
-    image.save("C:/ImagesForTesting/final_shai.jpg")
+    image.save("/Users/yarden.benbassat/Desktop/Images-for-face-cloaking/Ben Stiller final result.jpeg")
 
     return original_image
 
 
 
-bounding_box_detector("C:/ImagesForTesting/shai.jpg")
+bounding_box_detector("/Users/yarden.benbassat/Desktop/Images-for-face-cloaking/Ben Stiller.jpeg")

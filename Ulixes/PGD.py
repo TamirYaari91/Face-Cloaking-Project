@@ -1,4 +1,3 @@
-import cv2
 import torch
 import torch.nn as nn
 import numpy as np
@@ -8,8 +7,9 @@ from PIL import Image
 
 EPSILON = 0.0001
 EMBEDDING_MODEL = InceptionResnetV1(pretrained="vggface2").eval()
-filename_for_original_image_cropped = "original_cropped.jpg"
-filename_for_perturbated_image_ulixes = "ulixes_perturbated.jpg"  # TODO - need to be png?
+filename_for_original_image_cropped = "/Users/yarden.benbassat/Desktop/Images-for-face-cloaking/Ben Stiller cropped image.jpg"
+filename_for_perturbated_image_ulixes = "/Users/yarden.benbassat/Desktop/Images-for-face-cloaking/Ben Stiller cloaked cropped.jpg"
+# TODO - need to be png?
 
 
 def Ulixes(image, margin):
@@ -104,5 +104,5 @@ def normalize_cloaked_image_tensor(image):
     return normalized_image
 
 
-# if __name__ == '__main__':
-#     Ulixes("C:\ImagesForTesting\matt.jpg", 2)
+if __name__ == '__main__':
+    Ulixes("/Users/yarden.benbassat/Desktop/Images-for-face-cloaking/Ben Stiller.jpeg", 2)
