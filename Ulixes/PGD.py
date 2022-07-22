@@ -1,3 +1,4 @@
+import cv2
 import torch
 import torch.nn as nn
 import numpy as np
@@ -7,28 +8,31 @@ from PIL import Image
 
 EPSILON = 0.0001
 EMBEDDING_MODEL = InceptionResnetV1(pretrained="vggface2").eval()
-filename_for_original_image_cropped = "cropped_original.jpg"
-filename_for_perturbated_image_ulixes = "cloaked_cropped_ulixes.jpg"  # TODO - need to be png?
+filename_for_original_image_cropped = "C:\ImagesForTesting\cropped_original.jpg"
+filename_for_perturbated_image_ulixes = "C:\ImagesForTesting\cloaked_cropped_ulixes.jpg"  # TODO - need to be png?
 
 
 def Ulixes(image, margin):
     cropped_image = crop_image(image, filename_for_original_image_cropped)
-    noise_mask = pgd(cropped_image, margin) # PGD
+    noise_mask = pgd(cropped_image, margin)  # PGD
 
+    # Add noise mask to the cropped face image, normalize its values and change the order of dimensions
     cropped_image_with_mask = add_noise_mask(cropped_image, noise_mask)
     cloaked_image_normalized = normalize_cloaked_image_tensor(cropped_image_with_mask)
-    #
     cloaked_image_array_normalized = cloaked_image_normalized.detach().numpy()
     cloaked_image_array_normalized = np.swapaxes(cloaked_image_array_normalized, 0, 1)  # [3, 160, 160] -> [160, 3, 160]
     cloaked_image_array_normalized = np.swapaxes(cloaked_image_array_normalized, 1, 2)  # [160, 3, 160] -> [160, 160, 3]
-    #
+
+    # TODO: CALL BOUNDING_BOX CODE AND PUT THE CLOAKED FACE IN THE RIGHT PLACE
+
+    # Save image
     cloaked_image = Image.fromarray(cloaked_image_array_normalized.astype(np.uint8))
     cloaked_image.save(filename_for_perturbated_image_ulixes)
     return cloaked_image
 
 
 def crop_image(image, cropped_path):
-    mtcnn_pt = MTCNN(device=torch.device("cpu"))
+    mtcnn_pt = MTCNN()
     image = Image.open(image).convert("RGB")
     image_cropped = mtcnn_pt(image, save_path=cropped_path)
     return image_cropped
@@ -60,7 +64,7 @@ def pgd(image, margin=1.1, alpha=8/255):
         anchor = torch.add(anchor, new_noise)
 
         difference_of_prev_anchor_and_new_anchor = np.linalg.norm(get_embedding(anchor).detach() - get_embedding(prev_anchor).detach())
-        print(f"distance from embeddings of current noisy anchor and last noisy anchor: {difference_of_prev_anchor_and_new_anchor}")
+        print(f"new noise: {difference_of_prev_anchor_and_new_anchor}")
         if difference_of_prev_anchor_and_new_anchor < threshold:
             break
 
@@ -101,4 +105,4 @@ def normalize_cloaked_image_tensor(image):
 
 
 if __name__ == '__main__':
-    Ulixes("C:\matt.jpg", 1.1)
+    Ulixes("C:\ImagesForTesting\matt.jpg", 2)
