@@ -8,8 +8,8 @@ from PIL import Image
 
 EPSILON = 0.0001
 EMBEDDING_MODEL = InceptionResnetV1(pretrained="vggface2").eval()
-filename_for_original_image_cropped = "C:\ImagesForTesting\cropped_original.jpg"
-filename_for_perturbated_image_ulixes = "C:\ImagesForTesting\cloaked_cropped_ulixes.jpg"  # TODO - need to be png?
+filename_for_original_image_cropped = "original_cropped.jpg"
+filename_for_perturbated_image_ulixes = "ulixes_perturbated.jpg"  # TODO - need to be png?
 
 
 def Ulixes(image, margin=1.1):
@@ -105,5 +105,5 @@ def normalize_cloaked_image_tensor(image):
     return normalized_image
 
 
-if __name__ == '__main__':
-    Ulixes("C:\ImagesForTesting\matt.jpg", 2)
+# if __name__ == '__main__':
+#     Ulixes("C:\ImagesForTesting\matt.jpg", 2)
