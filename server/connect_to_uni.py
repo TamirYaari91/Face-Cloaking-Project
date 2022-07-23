@@ -1,4 +1,6 @@
 import os
+import time
+
 import paramiko
 
 ssh_port = 22
@@ -7,11 +9,11 @@ my_password = ""  # TODO - insert password here
 nova = "nova.cs.tau.ac.il"
 c_008 = "c-008.cs.tau.ac.il"
 filename_for_original_image = "original.jpg"
-filename_for_perturbated_image_faceoff = "cloaked_faceoff.jpg"
+# filename_for_perturbated_image_faceoff = "cloaked_faceoff.jpg"
 faceoff_basepath = "/home/sharifm/teaching/uspw-0368-3544/2022-spring/group-04/face-off/"
 filepath_for_original_image = faceoff_basepath + "data/test_imgs/myface/"
 
-margin = str(6)
+margin = str(3)
 amplification = str(3)
 commands = \
     [
@@ -19,6 +21,8 @@ commands = \
         "cd " + faceoff_basepath,
         "python src/attack.py --source myface --pair-flag true --margin " + margin + " --amplification " + amplification
     ]
+
+filename_for_perturbated_image_faceoff = f"cloaked_faceoff_{margin}_{amplification}.jpg"
 
 faceoff_full_command = "\n".join(commands)
 
@@ -67,11 +71,21 @@ faceoff_ret_val = ['Loading Images...\n',
 def connect_to_host(host, username, password, port):
     ssh_client = paramiko.SSHClient()
     ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh_client.connect(host, port, username, password)
+    # ssh_client.connect(host, port, username, password)
+    ssh_client.connect(host, port, username, password, timeout=86400)
     return ssh_client
 
 
-def faceoff_init(host, username, password, port, command):
+def calc_dssim_faceoff():
+    command = "dssim " + filename_for_original_image + " " + filename_for_perturbated_image_faceoff
+    output = os.popen(command).read()
+    output = [val.strip() for val in output.split('\t')]
+    return output[0]
+
+
+def faceoff_init(host, username, password, port, command, filename_for_perturbated_image_faceoff_param):
+    start = time.time()
+
     # Open connection
     ssh_client = connect_to_host(host, username, password, port)
 
@@ -90,7 +104,7 @@ def faceoff_init(host, username, password, port, command):
     # Download cloaked image
     final_perturbation_path = get_path_to_final_perturbation(lines)
     download_file_from_path(ssh_client, final_perturbation_path,
-                            os.getcwd() + '/' + filename_for_perturbated_image_faceoff)
+                            os.getcwd() + '/' + filename_for_perturbated_image_faceoff_param)
 
     # Delete original image from UNI servers
     delete_file_from_path(ssh_client, filepath_for_original_image, filename_for_original_image)
@@ -99,10 +113,38 @@ def faceoff_init(host, username, password, port, command):
     if ssh_client is not None:
         ssh_client.close()
         del ssh_client, stdin, stdout, stderr
-    return lines
+
+    elapsed = time.time()
+    elapsed = elapsed - start
+    # print("margin = " + str(margin))
+    # print("amplification = " + str(amplification))
+    # print("elapsed time = " + str(elapsed))
+    dssim = calc_dssim_faceoff()
+    # print("dssim = " + str(dssim))
+
+    dssim = float(dssim)
+    return dssim
 
 
 def faceoff_wrapper():
-    return faceoff_init(c_008, my_username, my_password, ssh_port, faceoff_full_command)
+    num_of_runs = 1
+    global amplification
+    global margin
+    print("starting measurements run")
+    print("----------")
+    for i in range(3, 20):
+        dssim = 0.0
+        amplification = i
+        margin = i
+        filename_for_perturbated_image_faceoff_param = f"cloaked_faceoff_{i}.jpg"
+        for j in range(num_of_runs):
+            print("margin = " + str(margin) + ", amplification = " + str(amplification) + ", j = " + str(j))
+            dssim += faceoff_init(c_008, my_username, my_password, ssh_port, faceoff_full_command,
+                                  filename_for_perturbated_image_faceoff_param)
+
+        dssim = dssim / num_of_runs
+        print("average dssim for margin = " + str(margin) + ", amplification = " + str(amplification) + " over " + str(
+            num_of_runs) + " runs = " + str(dssim))
+        print("----------")
 
 # res = faceoff_wrapper()
