@@ -114,10 +114,10 @@ def image_handler():
     faceoff_thread.join()
     ulixes_thread.join()
 
-    # img_faceoff = Image.open(os.getcwd() + '/' + ctu.filename_for_perturbated_image_faceoff)
+    img_faceoff = Image.open(os.getcwd() + '/' + ctu.filename_for_perturbated_image_faceoff)
     img_ulixes = Image.open(os.getcwd() + '/' + PGD.filename_for_perturbated_image_ulixes)
 
-    # img_faceoff_b64 = pil_image_to_image_base64_string(img_faceoff, "jpeg")
+    img_faceoff_b64 = pil_image_to_image_base64_string(img_faceoff, "jpeg")
     img_ulixes_b64 = pil_image_to_image_base64_string(img_ulixes, "jpeg")
 
     cloaked_images_b64 = dict()
