@@ -7,7 +7,7 @@ my_password = ""  # TODO - insert password here
 nova = "nova.cs.tau.ac.il"
 c_008 = "c-008.cs.tau.ac.il"
 filename_for_original_image = "original.jpg"
-filename_for_perturbated_image_faceoff = "cloaked_faceoff.jpg"
+filename_for_perturbated_image_faceoff = "faceoff_perturbated.jpg"
 faceoff_basepath = "/home/sharifm/teaching/uspw-0368-3544/2022-spring/group-04/face-off/"
 filepath_for_original_image = faceoff_basepath + "data/test_imgs/myface/"
 
