@@ -1,11 +1,12 @@
-import http
+import base64
 import os
 import threading
+from io import BytesIO
+
 from PIL import Image
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import base64
-from io import BytesIO
+
 import connect_to_uni as ctu
 from Ulixes import PGD
 
