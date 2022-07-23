@@ -12,7 +12,7 @@ filename_for_original_image_cropped = "C:\ImagesForTesting\cropped_original.jpg"
 filename_for_perturbated_image_ulixes = "C:\ImagesForTesting\cloaked_cropped_ulixes.jpg"  # TODO - need to be png?
 
 
-def Ulixes(image, margin):
+def Ulixes(image, margin=1.1):
     cropped_image = crop_image(image, filename_for_original_image_cropped)
     noise_mask = pgd(cropped_image, margin)  # PGD
 
@@ -38,7 +38,7 @@ def crop_image(image, cropped_path):
     return image_cropped
 
 
-def pgd(image, margin=1.1, alpha=8/255):
+def pgd(image, margin=1.1, alpha=8 / 255):
     # margin: set to 1.1 as default, can be between [0.2, 2] to change intensity of noise masks introduced
 
     anchor = image
@@ -63,7 +63,8 @@ def pgd(image, margin=1.1, alpha=8/255):
         prev_anchor = anchor
         anchor = torch.add(anchor, new_noise)
 
-        difference_of_prev_anchor_and_new_anchor = np.linalg.norm(get_embedding(anchor).detach() - get_embedding(prev_anchor).detach())
+        difference_of_prev_anchor_and_new_anchor = np.linalg.norm(
+            get_embedding(anchor).detach() - get_embedding(prev_anchor).detach())
         print(f"new noise: {difference_of_prev_anchor_and_new_anchor}")
         if difference_of_prev_anchor_and_new_anchor < threshold:
             break
