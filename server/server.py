@@ -84,7 +84,7 @@ def image_handler():
 
     # Create threads to run the different algorithms:
     faceoff_thread = threading.Thread(target=ctu.faceoff_wrapper)
-    ulixes_thread = threading.Thread(target=PGD.Ulixes, args=ctu.filename_for_original_image)
+    ulixes_thread = threading.Thread(target=PGD.Ulixes, args=(ctu.filename_for_original_image,))
 
     # Start the threads:
     faceoff_thread.start()
