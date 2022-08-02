@@ -3,7 +3,7 @@ import paramiko
 
 ssh_port = 22
 my_username = "tamiryaari"
-my_password = ""  # TODO - insert password here
+my_password = "Tsq12504"  # TODO - insert password here
 nova = "nova.cs.tau.ac.il"
 c_008 = "c-008.cs.tau.ac.il"
 filename_for_original_image = "original.jpg"

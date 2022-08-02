@@ -8,7 +8,12 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 import connect_to_uni as ctu
-from Ulixes import PGD
+from Ulixes.ulixes_controller import cloak_image_with_ulixes
+
+filename_for_original_image_cropped = "cropped.jpg"
+filename_for_perturbated_image_faceoff = "faceoff_perturbated.jpg"
+filename_for_perturbated_cropped_image_ulixes = "ulixes_perturbated_cropped.jpg"
+filename_for_perturbated_image_ulixes = "ulixes_perturbated.jpg"
 
 # Set up Flask:
 app = Flask(__name__)
@@ -64,13 +69,10 @@ def calc_dssim_faceoff():
 
 
 def calc_dssim_ulixes():
-    command = "dssim " + PGD.filename_for_original_image_cropped + " " + PGD.filename_for_perturbated_image_ulixes
+    command = "dssim " + ctu.filename_for_original_image + " " + filename_for_perturbated_image_ulixes
     output = os.popen(command).read()
     output = [val.strip() for val in output.split('\t')]
     return output[0]
-
-
-# TODO - Faceoff calculates DSSIM on entire image, Ulixes only on cropped face - change to entire image when possible
 
 
 @app.route("/image_receiver", methods=["POST"])
@@ -84,29 +86,34 @@ def image_handler():
     image_base64_string_to_jpeg(img_original_b64, ctu.filename_for_original_image)
 
     # Create threads to run the different algorithms:
-    faceoff_thread = threading.Thread(target=ctu.faceoff_wrapper)
-    ulixes_thread = threading.Thread(target=PGD.Ulixes, args=(ctu.filename_for_original_image,))
+    # faceoff_thread = threading.Thread(target=ctu.faceoff_wrapper)
+    ulixes_thread = threading.Thread(target=cloak_image_with_ulixes,
+                                     args=(ctu.filename_for_original_image, filename_for_original_image_cropped,
+                                           filename_for_perturbated_cropped_image_ulixes,
+                                           filename_for_perturbated_image_ulixes))
+
+    # ulixes_thread = threading.Thread(target=PGD.Ulixes, args=(ctu.filename_for_original_image,))
 
     # Start the threads:
-    faceoff_thread.start()
+    # faceoff_thread.start()
     ulixes_thread.start()
 
     # Wait for the threads to finish:
-    faceoff_thread.join()
+    # faceoff_thread.join()
     ulixes_thread.join()
 
-    img_faceoff = Image.open(os.getcwd() + '/' + ctu.filename_for_perturbated_image_faceoff)
-    img_ulixes = Image.open(os.getcwd() + '/' + PGD.filename_for_perturbated_image_ulixes)
+    # img_faceoff = Image.open(os.getcwd() + '/' + ctu.filename_for_perturbated_image_faceoff)
+    img_ulixes = Image.open(os.getcwd() + '/' + filename_for_perturbated_image_ulixes)
 
-    img_faceoff_b64 = pil_image_to_image_base64_string(img_faceoff, "jpeg")
+    # img_faceoff_b64 = pil_image_to_image_base64_string(img_faceoff, "jpeg")
     img_ulixes_b64 = pil_image_to_image_base64_string(img_ulixes, "jpeg")
 
     cloaked_images_b64 = dict()
     cloaked_images_b64["original_image"] = img_original_b64
-    cloaked_images_b64["faceoff_image"] = img_faceoff_b64
+    # cloaked_images_b64["faceoff_image"] = img_faceoff_b64
     cloaked_images_b64["ulixes_image"] = img_ulixes_b64
     cloaked_images_b64["original_dssim"] = calc_dssim_original()
-    cloaked_images_b64["faceoff_dssim"] = calc_dssim_faceoff()
+    # cloaked_images_b64["faceoff_dssim"] = calc_dssim_faceoff()
     cloaked_images_b64["ulixes_dssim"] = calc_dssim_ulixes()
     cloaked_images_b64["success"] = True
 
