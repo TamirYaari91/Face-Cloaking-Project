@@ -7,8 +7,7 @@ EPSILON = 0.0001
 EMBEDDING_MODEL = InceptionResnetV1(pretrained="vggface2").eval()
 
 
-def pgd(image, margin, alpha=8/255):
-
+def pgd(image, margin, alpha=8 / 255):
     anchor = image
     positive = image
     negative = add_epsilon_noise(image)
@@ -31,7 +30,8 @@ def pgd(image, margin, alpha=8/255):
         prev_anchor = anchor
         anchor = torch.add(anchor, new_noise)
 
-        difference_of_prev_anchor_and_new_anchor = np.linalg.norm(get_embedding(anchor).detach() - get_embedding(prev_anchor).detach())
+        difference_of_prev_anchor_and_new_anchor = np.linalg.norm(
+            get_embedding(anchor).detach() - get_embedding(prev_anchor).detach())
         print(f"new noise: {difference_of_prev_anchor_and_new_anchor}")
         if difference_of_prev_anchor_and_new_anchor < threshold:
             break
@@ -57,4 +57,3 @@ def scale(matrix, alpha):
     abs_matrix = torch.abs(matrix)
     inf_norm = torch.max(torch.linalg.matrix_norm(abs_matrix, ord=2))
     return torch.mul(torch.div(matrix, inf_norm), alpha)
-
