@@ -30,7 +30,3 @@ def cloak_image_with_ulixes(path_of_image_to_cloak, path_for_cropped_image, path
 
     return cloaked_result
 
-# cloak_image_with_ulixes("/Users/tamiryaari/Desktop/UNI/Year3/FCP/server/original.jpg",
-#                         "/Users/tamiryaari/Desktop/UNI/Year3/FCP/server/cropped.jpg",
-#                         "/Users/tamiryaari/Desktop/UNI/Year3/FCP/server/ulixes_perturbated_cropped.jpg",
-#                         "/Users/tamiryaari/Desktop/UNI/Year3/FCP/server/ulixes_perturbated.jpg")

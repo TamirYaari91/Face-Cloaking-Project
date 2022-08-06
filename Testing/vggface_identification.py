@@ -34,20 +34,22 @@ def extract_face(filename, required_size=(224, 224)):
     return face_array
 
 
-# load the photo and extract the face
-pixels = extract_face("C:\ImagesForTesting\cropped_original.jpg")
-# convert one face into samples
-pixels = pixels.astype('float32')
-samples = expand_dims(pixels, axis=0)
-# prepare the face for the model, e.g. center pixels
-samples = preprocess_input(samples, version=2)
-# create a vggface model
-model = VGGFace(model='resnet50')
-# model = VGGFace(model='vgg16')
-# perform prediction
-yhat = model.predict(samples)
-# convert prediction into names
-results = decode_predictions(yhat)
-# display most likely results
-for result in results[0]:
-    print('%s: %.3f%%' % (result[0], result[1] * 100))
+def identify_face(path_of_face_to_identify):
+    # load the photo and extract the face
+    pixels = extract_face(path_of_face_to_identify)
+    # convert one face into samples
+    pixels = pixels.astype('float32')
+    samples = expand_dims(pixels, axis=0)
+    # prepare the face for the model, e.g. center pixels
+    samples = preprocess_input(samples, version=2)
+    # create a vggface model
+    model = VGGFace(model='resnet50')
+    # model = VGGFace(model='vgg16')
+    # perform prediction
+    yhat = model.predict(samples)
+    # convert prediction into names
+    results = decode_predictions(yhat)
+    # display most likely results
+    for result in results[0]:
+        return '%s: %.3f%%' % (result[0], result[1] * 100)
+
