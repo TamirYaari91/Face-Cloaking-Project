@@ -1,4 +1,5 @@
 import base64
+import http
 import os
 import threading
 from io import BytesIO
@@ -73,6 +74,28 @@ def calc_dssim_ulixes():
     output = os.popen(command).read()
     output = [val.strip() for val in output.split('\t')]
     return output[0]
+
+
+def set_input_param_in_ulixes(input_param):
+    # input param is in range of [1,9] and ulixes param needs to be in [0.2,2]
+    min_value = 0.2
+    return min_value + 0.225 * (input_param - 1)
+
+
+input_params = dict()
+
+
+@app.route("/params_receiver", methods=["POST"])
+def params_handler():
+    data = request.get_json()
+    inputs_json = data[0]
+    input_param = int(list(inputs_json.values())[0])
+    input_params["ulixes"] = set_input_param_in_ulixes(input_param)
+
+    print("ulixes param = " + str(
+        input_params["ulixes"]))  # TODO - add this parameter to ulixes - using num of iterations and/or threshold?
+
+    return '', http.HTTPStatus.OK
 
 
 @app.route("/image_receiver", methods=["POST"])
