@@ -76,10 +76,10 @@ def calc_dssim_ulixes():
     return output[0]
 
 
-def set_input_param_in_ulixes(input_param):
-    # input param is in range of [1,9] and ulixes param needs to be in [0.2,2]
-    min_value = 0.2
-    return min_value + 0.225 * (input_param - 1)
+def set_ulixes_parameters(input_param):
+    # input param is in range of [1,5] and ulixes epochs needs to be in [100,300], threshold needs to be in [0.006,0.01]
+    parameters = [(100, 0.01), (150, 0.009), (200, 0.008), (250, 0.007), (300, 0.006)]
+    return parameters[input_param - 1]
 
 
 input_params = dict()
@@ -90,7 +90,7 @@ def params_handler():
     data = request.get_json()
     inputs_json = data[0]
     input_param = int(list(inputs_json.values())[0])
-    input_params["ulixes"] = set_input_param_in_ulixes(input_param)
+    input_params["ulixes"] = set_ulixes_parameters(input_param)
 
     print("ulixes param = " + str(
         input_params["ulixes"]))  # TODO - add this parameter to ulixes - using num of iterations and/or threshold?
@@ -104,6 +104,12 @@ def image_handler():
     if len(data[0].keys()) == 0:  # no image uploaded
         return jsonify(success=True)  # probably needs to be different
 
+    ulixes_epochs = input_params["ulixes"][0]
+    ulixes_threshold = input_params["ulixes"][1]
+
+    print(ulixes_epochs)
+    print(ulixes_threshold)
+
     # convert imb64 to jpeg:
     img_original_b64 = get_image_base64_string_from_data(data)
     image_base64_string_to_jpeg(img_original_b64, ctu.filename_for_original_image)
@@ -113,7 +119,7 @@ def image_handler():
     ulixes_thread = threading.Thread(target=cloak_image_with_ulixes,
                                      args=(ctu.filename_for_original_image, filename_for_original_image_cropped,
                                            filename_for_perturbated_cropped_image_ulixes,
-                                           filename_for_perturbated_image_ulixes))
+                                           filename_for_perturbated_image_ulixes, ulixes_epochs, ulixes_threshold))
 
     # Start the threads:
     faceoff_thread.start()

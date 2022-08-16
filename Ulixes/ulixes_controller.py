@@ -7,10 +7,11 @@ from Ulixes.utils_for_cloaking import crop_image_with_mtcnn, generate_cloaked_cr
 
 
 def cloak_image_with_ulixes(path_of_image_to_cloak, path_for_cropped_image, path_for_cloaked_and_cropped,
-                            path_for_cloaked_result, margin=1.1):
+                            path_for_cloaked_result, epochs=150, threshold=0.01):
     cropped_image = crop_image_with_mtcnn(path_of_image_to_cloak, path_for_cropped_image)
 
-    noise_mask = pgd(cropped_image, margin)
+    margin = 1.1
+    noise_mask = pgd(cropped_image, margin, epochs, threshold)
 
     cloaked_cropped_image_normalized_as_array = generate_cloaked_cropped_image_from_noise_mask(cropped_image,
                                                                                                noise_mask)
