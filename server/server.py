@@ -15,6 +15,7 @@ filename_for_original_image_cropped = "cropped.jpg"
 filename_for_perturbated_image_faceoff = "faceoff_perturbated.jpg"
 filename_for_perturbated_cropped_image_ulixes = "ulixes_perturbated_cropped.jpg"
 filename_for_perturbated_image_ulixes = "ulixes_perturbated.jpg"
+list_of_extensions_to_remove = (".jpg", ".jpeg", ".png")
 
 # Set up Flask:
 app = Flask(__name__)
@@ -51,8 +52,9 @@ def pil_image_to_image_base64_string(img, image_format):
 
 def delete_all_images_from_server():
     for file in os.listdir("."):
-        if file.endswith(".jpg") or file.endswith(".png"):
-            os.remove(file)
+        for extension in list_of_extensions_to_remove:
+            if file.endswith(extension):
+                os.remove(file)
 
 
 def calc_dssim_original():
