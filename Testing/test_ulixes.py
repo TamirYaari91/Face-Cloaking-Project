@@ -22,7 +22,7 @@ def generate_cloaked_images_from_original_images_dir():
 
             cloak_image_with_ulixes(original_image_path, cropped_image_path, cloaked_and_cropped_image_path,
                                     final_cloaked_image_path, epoch, threshold)
-        epoch -= 0.001
+        threshold -= 0.001
 
 
 def identify_images(path, directory):
