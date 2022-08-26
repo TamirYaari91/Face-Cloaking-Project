@@ -7,15 +7,19 @@ const spinner = document.getElementById("spinner");
 const uploadImageInput = document.querySelector("#image_input");
 const uploadImageBox = document.getElementsByClassName("display_image")[0];
 const uploadImageButton = document.getElementById("uploadImageButton");
+const ulixesToggleButton = document.getElementById("ulixes_toggle");
+const faceOffToggleButton = document.getElementById("faceoff_toggle");
 const jsonHeaders = {
     'Content-type': 'application/json',
     'Accept': 'application/json'
 }
 const domain = "http://127.0.0.1:5000/";
+//endregion
+
 let isFileChosen = false;
 let uploadImageInputBase64;
-
-//endregion
+let runUlixes = true;
+let runFaceOff = true;
 
 // region Functions
 function fillBoxWithImageFromFile(e, imageBox) {
@@ -86,16 +90,14 @@ async function uploadImageClick() {
     }
 
     let jsonBody = [
-        {"prefValue": parseInt(prefRange.value)}];
-
+        {
+            "prefValue": parseInt(prefRange.value),
+            "runUlixes": runUlixes,
+            "runFaceOff": runFaceOff
+        }];
     await postJsonToPythonAPI(domain, "params_receiver", jsonBody);
-    // let jsonFromFetchRes = await extractJsonFromFetchRes(fetchRes);
-    // await extractPrefValueFromJsonUpdateHTML(jsonFromFetchRes);
-
-    jsonBody = [
-        {"imageData": uploadImageInputBase64}];
-
     jsonBody = [{"imageData": uploadImageInputBase64}];
+
     let fetchRes = await postJsonToPythonAPI(domain, "image_receiver", jsonBody);
     let jsonFromFetchRes = await extractJsonFromFetchRes(fetchRes);
     await extractImageFromJsonAddToLocalStorage(jsonFromFetchRes);
@@ -105,6 +107,15 @@ async function uploadImageClick() {
 // endregion
 
 localStorage.clear();
+
+ulixesToggleButton.onclick = function () {
+    runUlixes = !runUlixes;
+}
+
+faceOffToggleButton.onclick = function () {
+    runFaceOff = !runFaceOff;
+}
+
 
 uploadImageInput.addEventListener("change", function () {
     const reader = new FileReader();
