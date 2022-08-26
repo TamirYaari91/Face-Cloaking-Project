@@ -121,22 +121,22 @@ def image_handler():
                                            filename_for_perturbated_image_ulixes, ulixes_epochs, ulixes_threshold))
 
     # Start the threads:
-    # faceoff_thread.start()
+    faceoff_thread.start()
     ulixes_thread.start()
 
     # Wait for the threads to finish:
-    # faceoff_thread.join()
+    faceoff_thread.join()
     ulixes_thread.join()
 
-    # img_faceoff = Image.open(os.getcwd() + '/' + ctu.filename_for_perturbated_image_faceoff)
+    img_faceoff = Image.open(os.getcwd() + '/' + ctu.filename_for_perturbated_image_faceoff)
     img_ulixes = Image.open(os.getcwd() + '/' + filename_for_perturbated_image_ulixes)
 
-    # img_faceoff_b64 = pil_image_to_image_base64_string(img_faceoff, "jpeg")
+    img_faceoff_b64 = pil_image_to_image_base64_string(img_faceoff, "jpeg")
     img_ulixes_b64 = pil_image_to_image_base64_string(img_ulixes, "jpeg")
 
     data_for_results_page["original_image"] = img_original_b64
 
-    # data_for_results_page["faceoff_image"] = img_faceoff_b64
+    data_for_results_page["faceoff_image"] = img_faceoff_b64
     data_for_results_page["faceoff_dssim"] = calc_dssim_faceoff()
 
     data_for_results_page["ulixes_image"] = img_ulixes_b64
