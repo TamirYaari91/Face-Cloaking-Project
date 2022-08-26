@@ -93,10 +93,13 @@ data_for_results_page = dict()
 def params_handler():
     data = request.get_json()
     inputs_json = data[0]
-    input_param = int(list(inputs_json.values())[0])
+    print(inputs_json)
+    ulixes_input_param = int(inputs_json["prefValue"])
 
-    data_for_results_page["range_bar_level"] = input_param
-    input_params["ulixes"] = set_ulixes_parameters(input_param)
+    data_for_results_page["range_bar_level"] = ulixes_input_param
+    input_params["ulixes_params"] = set_ulixes_parameters(ulixes_input_param)
+    input_params["should_run_ulixes"] = inputs_json["runUlixes"]
+    input_params["should_run_faceoff"] = inputs_json["runFaceOff"]
 
     return '', http.HTTPStatus.OK
 
@@ -107,8 +110,10 @@ def image_handler():
     if len(data[0].keys()) == 0:  # no image uploaded
         return jsonify(success=True)  # probably needs to be different
 
-    ulixes_epochs = input_params["ulixes"][0]
-    ulixes_threshold = input_params["ulixes"][1]
+    ulixes_epochs = input_params["ulixes_params"][0]
+    ulixes_threshold = input_params["ulixes_params"][1]
+    should_run_ulixes = input_params["should_run_ulixes"]
+    should_run_faceoff = input_params["should_run_faceoff"]
 
     # convert imb64 to jpeg:
     img_original_b64 = get_image_base64_string_from_data(data)
@@ -121,27 +126,31 @@ def image_handler():
                                            filename_for_perturbated_cropped_image_ulixes,
                                            filename_for_perturbated_image_ulixes, ulixes_epochs, ulixes_threshold))
 
-    # Start the threads:
-    faceoff_thread.start()
-    ulixes_thread.start()
-
-    # Wait for the threads to finish:
-    faceoff_thread.join()
-    ulixes_thread.join()
-
-    img_faceoff = Image.open(os.getcwd() + '/' + ctu.filename_for_perturbated_image_faceoff)
-    img_ulixes = Image.open(os.getcwd() + '/' + filename_for_perturbated_image_ulixes)
-
-    img_faceoff_b64 = pil_image_to_image_base64_string(img_faceoff, "jpeg")
-    img_ulixes_b64 = pil_image_to_image_base64_string(img_ulixes, "jpeg")
-
     data_for_results_page["original_image"] = img_original_b64
 
-    data_for_results_page["faceoff_image"] = img_faceoff_b64
-    data_for_results_page["faceoff_dssim"] = calc_dssim_faceoff()
+    # Start the threads:
+    if should_run_ulixes:
+        ulixes_thread.start()
+    if should_run_faceoff:
+        faceoff_thread.start()
 
-    data_for_results_page["ulixes_image"] = img_ulixes_b64
-    data_for_results_page["ulixes_dssim"] = calc_dssim_ulixes()
+    # Wait for the threads to finish:
+    if should_run_ulixes:
+        ulixes_thread.join()
+    if should_run_faceoff:
+        faceoff_thread.join()
+
+    if should_run_ulixes:
+        img_ulixes = Image.open(os.getcwd() + '/' + filename_for_perturbated_image_ulixes)
+        img_ulixes_b64 = pil_image_to_image_base64_string(img_ulixes, "jpeg")
+        data_for_results_page["ulixes_image"] = img_ulixes_b64
+        data_for_results_page["ulixes_dssim"] = calc_dssim_ulixes()
+
+    if should_run_faceoff:
+        img_faceoff = Image.open(os.getcwd() + '/' + ctu.filename_for_perturbated_image_faceoff)
+        img_faceoff_b64 = pil_image_to_image_base64_string(img_faceoff, "jpeg")
+        data_for_results_page["faceoff_image"] = img_faceoff_b64
+        data_for_results_page["faceoff_dssim"] = calc_dssim_faceoff()
 
     data_for_results_page["success"] = True
 
