@@ -3,10 +3,11 @@ import http
 import os
 import threading
 from io import BytesIO
-
 from PIL import Image
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import sys
+sys.path.append("..")
 
 import connect_to_uni as ctu
 from Ulixes.ulixes_controller import cloak_image_with_ulixes
