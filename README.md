@@ -10,9 +10,14 @@ Use the package manager [pip](https://pip.pypa.io/en/stable/) or any other packa
 
 ## Usage
 
+### Prerequisites
+
 This is a pilot version, intended for the exclusive use of Tel Aviv University Computer Science department personnel only.
 
 This is due to the fact that it uses TAU servers in order to run the Face-Off algorithm, for which a user & password are required (search for the TODO comments for the specific location where the credentials are to be entered).
+In future versions, we will have the capacity to run Face-Off on our own servers, or a dedicated TAU user in order to do so.
+
+In addition, you will need to be logged in to the TAU VPN, or to be connected to a TAU network.
 
 In order to run the platform you will need to run the back end server and the web server simultaneously.
 
