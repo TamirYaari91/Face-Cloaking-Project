@@ -2,7 +2,7 @@ import os
 import paramiko
 
 ssh_port = 22
-my_username = "tamiryaari"
+my_username = "" # TODO - insert username here
 my_password = ""  # TODO - insert password here
 nova = "nova.cs.tau.ac.il"
 c_005 = "c-005.cs.tau.ac.il"
