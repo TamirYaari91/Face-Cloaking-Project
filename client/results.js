@@ -73,6 +73,7 @@ let ulixesDSSIM = "<b>DSSIM:</b> " + localStorage.getItem("ulixes_dssim");
 let rangeBarLevel = localStorage.getItem("range_bar_level");
 
 let originalEvasivenessScore = "<b>Evasiveness Score:</b> " + "0"; // Original images will not fool VGGFace2
+let faceOffEvasivenessScore = "<b>Evasiveness Score:</b> " + "90"; // Extracted from the Face-Off article as explained in the report
 let ulixesEvasivenessScore = "<b>Evasiveness Score:</b> " + ulixesEvasivenessScoreMap.get(rangeBarLevel);
 
 fillBoxWithImageFromJson(originalImageInputBase64, resultsOriginalImageBox);
@@ -84,8 +85,8 @@ faceOffDSSIMTextBox.innerHTML = faceOffDSSIM;
 ulixesDSSIMTextBox.innerHTML = ulixesDSSIM;
 
 originalEvasivenessMTextBox.innerHTML = originalEvasivenessScore;
+faceOffEvasivenessTextBox.innerHTML = faceOffEvasivenessScore;
 ulixesEvasivenessTextBox.innerHTML = ulixesEvasivenessScore;
-
 
 originalImageButton.onclick = function () {
     openImageInNewTab(originalImageInputBase64)
