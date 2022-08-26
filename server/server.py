@@ -85,6 +85,7 @@ def set_ulixes_parameters(input_param):
 
 
 input_params = dict()
+data_for_results_page = dict()
 
 
 @app.route("/params_receiver", methods=["POST"])
@@ -92,10 +93,9 @@ def params_handler():
     data = request.get_json()
     inputs_json = data[0]
     input_param = int(list(inputs_json.values())[0])
-    input_params["ulixes"] = set_ulixes_parameters(input_param)
 
-    print("ulixes param = " + str(
-        input_params["ulixes"]))  # TODO - add this parameter to ulixes - using num of iterations and/or threshold?
+    data_for_results_page["range_bar_level"] = input_param
+    input_params["ulixes"] = set_ulixes_parameters(input_param)
 
     return '', http.HTTPStatus.OK
 
@@ -109,9 +109,6 @@ def image_handler():
     ulixes_epochs = input_params["ulixes"][0]
     ulixes_threshold = input_params["ulixes"][1]
 
-    print(ulixes_epochs)
-    print(ulixes_threshold)
-
     # convert imb64 to jpeg:
     img_original_b64 = get_image_base64_string_from_data(data)
     image_base64_string_to_jpeg(img_original_b64, ctu.filename_for_original_image)
@@ -124,29 +121,30 @@ def image_handler():
                                            filename_for_perturbated_image_ulixes, ulixes_epochs, ulixes_threshold))
 
     # Start the threads:
-    faceoff_thread.start()
+    # faceoff_thread.start()
     ulixes_thread.start()
 
     # Wait for the threads to finish:
-    faceoff_thread.join()
+    # faceoff_thread.join()
     ulixes_thread.join()
 
-    img_faceoff = Image.open(os.getcwd() + '/' + ctu.filename_for_perturbated_image_faceoff)
+    # img_faceoff = Image.open(os.getcwd() + '/' + ctu.filename_for_perturbated_image_faceoff)
     img_ulixes = Image.open(os.getcwd() + '/' + filename_for_perturbated_image_ulixes)
 
-    img_faceoff_b64 = pil_image_to_image_base64_string(img_faceoff, "jpeg")
+    # img_faceoff_b64 = pil_image_to_image_base64_string(img_faceoff, "jpeg")
     img_ulixes_b64 = pil_image_to_image_base64_string(img_ulixes, "jpeg")
 
-    cloaked_images_b64 = dict()
-    cloaked_images_b64["original_image"] = img_original_b64
-    cloaked_images_b64["faceoff_image"] = img_faceoff_b64
-    cloaked_images_b64["ulixes_image"] = img_ulixes_b64
-    cloaked_images_b64["original_dssim"] = calc_dssim_original()
-    cloaked_images_b64["faceoff_dssim"] = calc_dssim_faceoff()
-    cloaked_images_b64["ulixes_dssim"] = calc_dssim_ulixes()
-    cloaked_images_b64["success"] = True
+    data_for_results_page["original_image"] = img_original_b64
 
-    res = jsonify(cloaked_images_b64)
+    # data_for_results_page["faceoff_image"] = img_faceoff_b64
+    data_for_results_page["faceoff_dssim"] = calc_dssim_faceoff()
+
+    data_for_results_page["ulixes_image"] = img_ulixes_b64
+    data_for_results_page["ulixes_dssim"] = calc_dssim_ulixes()
+
+    data_for_results_page["success"] = True
+
+    res = jsonify(data_for_results_page)
     delete_all_images_from_server()
     return res
 

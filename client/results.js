@@ -20,6 +20,18 @@ const originalDSSIMTextBox = document.getElementById("original_dssim");
 const faceOffDSSIMTextBox = document.getElementById("faceoff_dssim");
 const ulixesDSSIMTextBox = document.getElementById("ulixes_dssim");
 
+const originalEvasivenessMTextBox = document.getElementById("original_evasiveness");
+const faceOffEvasivenessTextBox = document.getElementById("faceoff_evasiveness");
+const ulixesEvasivenessTextBox = document.getElementById("ulixes_evasiveness");
+
+const ulixesEvasivenessScoreMap = new Map([ // Calculated offline as explained in the report
+    ["1", "59.24"],
+    ["2", "74.62"],
+    ["3", "83.12"],
+    ["4", "92.1"],
+    ["5", "93.52"]
+])
+
 //endregion
 
 // region Functions
@@ -53,16 +65,26 @@ resultsJsonKeyToImageBoxClass.set("ulixes", resultsUlixesImageBox);
 let originalImageInputBase64 = "data:image/jpeg;base64," + localStorage.getItem("original_image");
 let faceOffImageInputBase64 = "data:image/jpeg;base64," + localStorage.getItem("faceoff_image");
 let ulixesImageInputBase64 = "data:image/jpeg;base64," + localStorage.getItem("ulixes_image");
-let originalDSSIM = "<b>DSSIM:</b> " + localStorage.getItem("original_dssim");
+
+let originalDSSIM = "<b>DSSIM:</b> " + "0"; // DSSIM between 2 identical images = 0
 let faceOffDSSIM = "<b>DSSIM:</b> " + localStorage.getItem("faceoff_dssim");
 let ulixesDSSIM = "<b>DSSIM:</b> " + localStorage.getItem("ulixes_dssim");
+
+let rangeBarLevel = localStorage.getItem("range_bar_level");
+
+let originalEvasivenessScore = "<b>Evasiveness Score:</b> " + "0"; // Original images will not fool VGGFace2
+let ulixesEvasivenessScore = "<b>Evasiveness Score:</b> " + ulixesEvasivenessScoreMap.get(rangeBarLevel);
 
 fillBoxWithImageFromJson(originalImageInputBase64, resultsOriginalImageBox);
 fillBoxWithImageFromJson(faceOffImageInputBase64, resultsFaceOffImageBox);
 fillBoxWithImageFromJson(ulixesImageInputBase64, resultsUlixesImageBox);
+
 originalDSSIMTextBox.innerHTML = originalDSSIM;
 faceOffDSSIMTextBox.innerHTML = faceOffDSSIM;
 ulixesDSSIMTextBox.innerHTML = ulixesDSSIM;
+
+originalEvasivenessMTextBox.innerHTML = originalEvasivenessScore;
+ulixesEvasivenessTextBox.innerHTML = ulixesEvasivenessScore;
 
 
 originalImageButton.onclick = function () {

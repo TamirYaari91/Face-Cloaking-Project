@@ -15,7 +15,7 @@ def pgd(image, margin, alpha=8 / 255, epochs=150, threshold=0.01):
 
     noise_mask = 0.0
 
-    for i in range(epochs):
+    for i in range(int(epochs)):
 
         anchor.requires_grad = True
         loss = adv_triplet_margin_loss(get_embedding(positive), get_embedding(anchor), get_embedding(negative))

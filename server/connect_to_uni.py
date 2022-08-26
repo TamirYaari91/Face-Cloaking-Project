@@ -5,14 +5,14 @@ ssh_port = 22
 my_username = "tamiryaari"
 my_password = ""  # TODO - insert password here
 nova = "nova.cs.tau.ac.il"
-c_008 = "c-008.cs.tau.ac.il"
+c_005 = "c-005.cs.tau.ac.il"
 filename_for_original_image = "original.jpg"
 filename_for_perturbated_image_faceoff = "faceoff_perturbated.jpg"
 faceoff_basepath = "/home/sharifm/teaching/uspw-0368-3544/2022-spring/group-04/face-off/"
 filepath_for_original_image = faceoff_basepath + "data/test_imgs/myface/"
 
-margin = str(6)
-amplification = str(3)
+margin = str(6)  # default in Face-Off code
+amplification = str(5.1)  # default in Face-Off code
 commands = \
     [
         "conda activate tf-gpu",
@@ -103,6 +103,6 @@ def faceoff_init(host, username, password, port, command):
 
 
 def faceoff_wrapper():
-    return faceoff_init(c_008, my_username, my_password, ssh_port, faceoff_full_command)
+    return faceoff_init(c_005, my_username, my_password, ssh_port, faceoff_full_command)
 
 # res = faceoff_wrapper()
