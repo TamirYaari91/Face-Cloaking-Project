@@ -7,6 +7,7 @@ from PIL import Image
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import sys
+
 sys.path.append("..")
 
 import connect_to_uni as ctu
@@ -81,12 +82,14 @@ def calc_dssim_ulixes():
 
 def set_ulixes_parameters(input_param):
     # input param is in range of [1,5] and ulixes epochs needs to be in [100,300], threshold needs to be in [0.006,0.01]
-    parameters = [(100, 0.01), (150, 0.009), (200, 0.008), (250, 0.007), (300, 0.006)]
+    parameters = [(300, 0.006),(250, 0.007),(200, 0.008),(150, 0.009),(100, 0.01)]
     return parameters[input_param - 1]
 
 
 input_params = dict()
 data_for_results_page = dict()
+faceoff_error_dict = dict()
+ulixes_error_dict = dict()
 
 
 @app.route("/params_receiver", methods=["POST"])
@@ -119,7 +122,7 @@ def image_handler():
     image_base64_string_to_jpeg(img_original_b64, ctu.filename_for_original_image)
 
     # Create threads to run the different algorithms:
-    faceoff_thread = threading.Thread(target=ctu.faceoff_wrapper)
+    faceoff_thread = threading.Thread(target=ctu.faceoff_wrapper, args=(faceoff_error_dict,))
     ulixes_thread = threading.Thread(target=cloak_image_with_ulixes,
                                      args=(ctu.filename_for_original_image, filename_for_original_image_cropped,
                                            filename_for_perturbated_cropped_image_ulixes,
@@ -146,12 +149,25 @@ def image_handler():
         data_for_results_page["ulixes_dssim"] = calc_dssim_ulixes()
 
     if should_run_faceoff:
-        img_faceoff = Image.open(os.getcwd() + '/' + ctu.filename_for_perturbated_image_faceoff)
-        img_faceoff_b64 = pil_image_to_image_base64_string(img_faceoff, "jpeg")
-        data_for_results_page["faceoff_image"] = img_faceoff_b64
-        data_for_results_page["faceoff_dssim"] = calc_dssim_faceoff()
+        try:
+            img_faceoff = Image.open(os.getcwd() + '/' + ctu.filename_for_perturbated_image_faceoff)
+            img_faceoff_b64 = pil_image_to_image_base64_string(img_faceoff, "jpeg")
+            data_for_results_page["faceoff_image"] = img_faceoff_b64
+            data_for_results_page["faceoff_dssim"] = calc_dssim_faceoff()
+        except FileNotFoundError as e:
+            print(f"FileNotFoundError: {e}")
+            if faceoff_error_dict["error"] == "timeout":
+                data_for_results_page["faceoff_error"] = "Connection Timeout"
+            else:
+                data_for_results_page["faceoff_error"] = "File not found"
+        except Exception as e:
+            print(f"Other Error: {e}")
+            data_for_results_page["faceoff_error"] = "Other"
 
-    data_for_results_page["success"] = True
+    if faceoff_error_dict or ulixes_error_dict:
+        data_for_results_page["success"] = False
+    else:
+        data_for_results_page["success"] = True
 
     res = jsonify(data_for_results_page)
     delete_all_images_from_server()

@@ -20,6 +20,7 @@ let isFileChosen = false;
 let uploadImageInputBase64;
 let runUlixes = true;
 let runFaceOff = true;
+let errorOccurred = false;
 
 // region Functions
 function fillBoxWithImageFromFile(e, imageBox) {
@@ -54,21 +55,27 @@ async function extractJsonFromFetchRes(res) {
 
 async function extractImageFromJsonAddToLocalStorage(json) {
     for (let key in json) {
-        if (key === "success") {
-            continue;
-        }
         let value = json[key];
+        if (key === "success") {
+            if (value === false) {
+                errorOccurred = true;
+                let errorMessage = "";
+                let faceOffError = localStorage.getItem("faceoff_error");
+                let ulixesError = localStorage.getItem("ulixes_error");
+                if (faceOffError != null) {
+                    errorMessage += "An error of has occurred in Face-Off: " + faceOffError + "\n";
+                }
+                if (ulixesError != null) {
+                    errorMessage += "An error of has occurred in Ulixes: " + ulixesError + "\n";
+                }
+                alert(errorMessage);
+            } else {
+                continue;
+            }
+        }
         localStorage.setItem(key, value);
     }
 }
-
-async function extractPrefValueFromJsonUpdateHTML(json) {
-    json = json[0];
-    console.log("Returned from Python = range+1");
-    console.log("prefValue = " + json.prefValue)
-    // after.innerHTML +=  + "<p>";
-}
-
 
 function updateLoadingSection(isFileChosen) {
     loadingMessage.style.display = "block";
@@ -132,7 +139,7 @@ uploadImageInput.addEventListener("change", function () {
 
 uploadImageButton.onclick = async function () {
     let isFileUploaded = await uploadImageClick();
-    if (isFileUploaded) {
+    if (isFileUploaded && !errorOccurred) {
         window.open("results.html", "_blank");
     }
     loadingMessage.style.display = "none";

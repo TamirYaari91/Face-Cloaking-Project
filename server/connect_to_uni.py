@@ -2,7 +2,7 @@ import os
 import paramiko
 
 ssh_port = 22
-my_username = "" # TODO - insert username here
+my_username = ""  # TODO - insert username here
 my_password = ""  # TODO - insert password here
 nova = "nova.cs.tau.ac.il"
 c_005 = "c-005.cs.tau.ac.il"
@@ -71,38 +71,44 @@ def connect_to_host(host, username, password, port):
     return ssh_client
 
 
-def faceoff_init(host, username, password, port, command):
-    # Open connection
-    ssh_client = connect_to_host(host, username, password, port)
+def faceoff_init(host, username, password, port, command,faceoff_error_dict):
+    try:
+        # Open connection
+        ssh_client = connect_to_host(host, username, password, port)
 
-    # Delete previous original image from UNI servers, if exists
-    delete_file_from_path(ssh_client, filepath_for_original_image, filename_for_original_image)
+        # Delete previous original image from UNI servers, if exists
+        delete_file_from_path(ssh_client, filepath_for_original_image, filename_for_original_image)
 
-    # Upload original image
-    upload_file_from_path(ssh_client, filepath_for_original_image + filename_for_original_image,
-                          os.getcwd() + '/' + filename_for_original_image)
+        # Upload original image
+        upload_file_from_path(ssh_client, filepath_for_original_image + filename_for_original_image,
+                              os.getcwd() + '/' + filename_for_original_image)
 
-    # Perform Face-Off
-    stdin, stdout, stderr = ssh_client.exec_command(command)
-    lines = stdout.readlines()
-    # lines = faceoff_ret_val
+        # Perform Face-Off
+        stdin, stdout, stderr = ssh_client.exec_command(command)
+        lines = stdout.readlines()
 
-    # Download cloaked image
-    final_perturbation_path = get_path_to_final_perturbation(lines)
-    download_file_from_path(ssh_client, final_perturbation_path,
-                            os.getcwd() + '/' + filename_for_perturbated_image_faceoff)
+        # Download cloaked image
+        final_perturbation_path = get_path_to_final_perturbation(lines)
+        download_file_from_path(ssh_client, final_perturbation_path,
+                                os.getcwd() + '/' + filename_for_perturbated_image_faceoff)
 
-    # Delete original image from UNI servers
-    delete_file_from_path(ssh_client, filepath_for_original_image, filename_for_original_image)
+        # Delete original image from UNI servers
+        delete_file_from_path(ssh_client, filepath_for_original_image, filename_for_original_image)
 
-    # Close connection
-    if ssh_client is not None:
-        ssh_client.close()
-        del ssh_client, stdin, stdout, stderr
-    return lines
+        # Close connection
+        if ssh_client is not None:
+            ssh_client.close()
+            del ssh_client, stdin, stdout, stderr
+        return lines
+    except TimeoutError as e:
+        print(f"Timeout Error: {e}")
+        faceoff_error_dict["error"] = "timeout"
+    except Exception as e:
+        print(f"Other Error: {e}")
+        faceoff_error_dict["error"] = "other"
 
 
-def faceoff_wrapper():
-    return faceoff_init(c_005, my_username, my_password, ssh_port, faceoff_full_command)
+def faceoff_wrapper(faceoff_error_dict):
+    return faceoff_init(c_005, my_username, my_password, ssh_port, faceoff_full_command,faceoff_error_dict)
 
 # res = faceoff_wrapper()
