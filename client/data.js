@@ -133,7 +133,7 @@ uploadImageInput.addEventListener("change", function () {
 uploadImageButton.onclick = async function () {
     let isFileUploaded = await uploadImageClick();
     if (isFileUploaded) {
-        window.open("results.html", "_blank"); //TODO - change to _self
+        window.open("results.html", "_blank");
     }
     loadingMessage.style.display = "none";
     spinner.style.display = "none";

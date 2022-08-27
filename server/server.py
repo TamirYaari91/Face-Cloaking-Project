@@ -107,7 +107,7 @@ def params_handler():
 def image_handler():
     data = request.get_json()
     if len(data[0].keys()) == 0:  # no image uploaded
-        return jsonify(success=True)  # probably needs to be different
+        return jsonify(success=True)
 
     ulixes_epochs = input_params["ulixes_params"][0]
     ulixes_threshold = input_params["ulixes_params"][1]
