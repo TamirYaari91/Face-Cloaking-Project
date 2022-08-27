@@ -93,7 +93,6 @@ data_for_results_page = dict()
 def params_handler():
     data = request.get_json()
     inputs_json = data[0]
-    print(inputs_json)
     ulixes_input_param = int(inputs_json["prefValue"])
 
     data_for_results_page["range_bar_level"] = ulixes_input_param

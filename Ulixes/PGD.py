@@ -7,7 +7,7 @@ EPSILON = 0.0001
 EMBEDDING_MODEL = InceptionResnetV1(pretrained="vggface2").eval()
 
 
-def pgd(image, margin, alpha=8 / 255, epochs=150, threshold=0.01):
+def pgd(image, margin, epochs=150, threshold=0.01, alpha=8 / 255):
     anchor = image
     positive = image
     negative = add_epsilon_noise(image)
