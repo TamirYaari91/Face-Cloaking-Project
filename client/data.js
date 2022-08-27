@@ -63,10 +63,10 @@ async function extractImageFromJsonAddToLocalStorage(json) {
                 let faceOffError = localStorage.getItem("faceoff_error");
                 let ulixesError = localStorage.getItem("ulixes_error");
                 if (faceOffError != null) {
-                    errorMessage += "An error of has occurred in Face-Off: " + faceOffError + "\n";
+                    errorMessage += "An error has occurred in Face-Off: " + faceOffError + "\n";
                 }
                 if (ulixesError != null) {
-                    errorMessage += "An error of has occurred in Ulixes: " + ulixesError + "\n";
+                    errorMessage += "An error has occurred in Ulixes: " + ulixesError + "\n";
                 }
                 alert(errorMessage);
             } else {

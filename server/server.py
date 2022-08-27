@@ -7,6 +7,7 @@ from PIL import Image
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import sys
+import logging
 
 sys.path.append("..")
 
@@ -126,7 +127,8 @@ def image_handler():
     ulixes_thread = threading.Thread(target=cloak_image_with_ulixes,
                                      args=(ctu.filename_for_original_image, filename_for_original_image_cropped,
                                            filename_for_perturbated_cropped_image_ulixes,
-                                           filename_for_perturbated_image_ulixes, ulixes_epochs, ulixes_threshold))
+                                           filename_for_perturbated_image_ulixes, ulixes_epochs, ulixes_threshold,
+                                           ulixes_error_dict))
 
     data_for_results_page["original_image"] = img_original_b64
 
@@ -143,10 +145,16 @@ def image_handler():
         faceoff_thread.join()
 
     if should_run_ulixes:
-        img_ulixes = Image.open(os.getcwd() + '/' + filename_for_perturbated_image_ulixes)
-        img_ulixes_b64 = pil_image_to_image_base64_string(img_ulixes, "jpeg")
-        data_for_results_page["ulixes_image"] = img_ulixes_b64
-        data_for_results_page["ulixes_dssim"] = calc_dssim_ulixes()
+        try:
+            img_ulixes = Image.open(os.getcwd() + '/' + filename_for_perturbated_image_ulixes)
+            img_ulixes_b64 = pil_image_to_image_base64_string(img_ulixes, "jpeg")
+            data_for_results_page["ulixes_image"] = img_ulixes_b64
+            data_for_results_page["ulixes_dssim"] = calc_dssim_ulixes()
+        except FileNotFoundError:
+            data_for_results_page["ulixes_error"] = "Face not found in image"
+        except Exception as e:
+            data_for_results_page["ulixes_error"] = "General error"
+            logging.exception(e)
 
     if should_run_faceoff:
         try:
@@ -154,15 +162,14 @@ def image_handler():
             img_faceoff_b64 = pil_image_to_image_base64_string(img_faceoff, "jpeg")
             data_for_results_page["faceoff_image"] = img_faceoff_b64
             data_for_results_page["faceoff_dssim"] = calc_dssim_faceoff()
-        except FileNotFoundError as e:
-            print(f"FileNotFoundError: {e}")
+        except FileNotFoundError:
             if faceoff_error_dict["error"] == "timeout":
-                data_for_results_page["faceoff_error"] = "Connection Timeout"
+                data_for_results_page["faceoff_error"] = "Connection timeout"
             else:
                 data_for_results_page["faceoff_error"] = "File not found"
         except Exception as e:
-            print(f"Other Error: {e}")
-            data_for_results_page["faceoff_error"] = "Other"
+            data_for_results_page["faceoff_error"] = "General error"
+            logging.exception(e)
 
     if faceoff_error_dict or ulixes_error_dict:
         data_for_results_page["success"] = False

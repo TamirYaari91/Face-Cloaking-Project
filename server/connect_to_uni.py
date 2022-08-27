@@ -1,5 +1,6 @@
 import os
 import paramiko
+import logging
 
 ssh_port = 22
 my_username = ""  # TODO - insert username here
@@ -71,7 +72,7 @@ def connect_to_host(host, username, password, port):
     return ssh_client
 
 
-def faceoff_init(host, username, password, port, command,faceoff_error_dict):
+def faceoff_init(host, username, password, port, command, faceoff_error_dict):
     try:
         # Open connection
         ssh_client = connect_to_host(host, username, password, port)
@@ -100,15 +101,12 @@ def faceoff_init(host, username, password, port, command,faceoff_error_dict):
             ssh_client.close()
             del ssh_client, stdin, stdout, stderr
         return lines
-    except TimeoutError as e:
-        print(f"Timeout Error: {e}")
+    except TimeoutError:
         faceoff_error_dict["error"] = "timeout"
     except Exception as e:
-        print(f"Other Error: {e}")
         faceoff_error_dict["error"] = "other"
+        logging.exception(e)
 
 
 def faceoff_wrapper(faceoff_error_dict):
-    return faceoff_init(c_005, my_username, my_password, ssh_port, faceoff_full_command,faceoff_error_dict)
-
-# res = faceoff_wrapper()
+    return faceoff_init(c_005, my_username, my_password, ssh_port, faceoff_full_command, faceoff_error_dict)
