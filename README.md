@@ -1,6 +1,6 @@
 # FCP
 
-FCP (Face Cloaking Project) is a Python-based framework for building and running a face obfuscation web platform.
+FCP (Face Cloaking Platform) is a Python-based framework for building and running a face obfuscation web platform.
 
 ## Installation
 
