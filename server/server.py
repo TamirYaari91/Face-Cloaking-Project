@@ -138,9 +138,9 @@ def image_handler():
             data_for_results_page["ulixes_image"] = img_ulixes_b64
             data_for_results_page["ulixes_dssim"] = calc_dssim_ulixes()
         except FileNotFoundError:
-            data_for_results_page["ulixes_error"] = "Face not found in image"
+            data_for_results_page["error_ulixes"] = "Face not found in image"
         except Exception as e:
-            data_for_results_page["ulixes_error"] = "General error"
+            data_for_results_page["error_ulixes"] = "General error"
             logging.exception(e)
 
     if should_run_faceoff:
@@ -151,11 +151,11 @@ def image_handler():
             data_for_results_page["faceoff_dssim"] = calc_dssim_faceoff()
         except FileNotFoundError:
             if faceoff_error_dict["error"] == "timeout":
-                data_for_results_page["faceoff_error"] = "Connection timeout"
+                data_for_results_page["error_faceoff"] = "Connection timeout"
             else:
-                data_for_results_page["faceoff_error"] = "File not found"
+                data_for_results_page["error_faceoff"] = "File not found"
         except Exception as e:
-            data_for_results_page["faceoff_error"] = "General error"
+            data_for_results_page["error_faceoff"] = "General error"
             logging.exception(e)
 
     if faceoff_error_dict or ulixes_error_dict:
