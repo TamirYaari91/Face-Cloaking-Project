@@ -17,12 +17,13 @@ const domain = "http://127.0.0.1:5000/";
 //endregion
 
 //region Variables
+
 let isFileChosen = false;
 let uploadImageInputBase64;
 let runUlixes = true;
 let runFaceOff = true;
 let errorOccurred = false;
-//endregion
+//end region
 
 // region Functions
 function fillBoxWithImageFromFile(e, imageBox) {
@@ -55,15 +56,15 @@ async function extractJsonFromFetchRes(res) {
     }
 }
 
-async function extractImageFromJsonAddToLocalStorage(json) {
+async function extractDataFromJsonAddToLocalStorage(json) {
     for (let key in json) {
         let value = json[key];
         if (key === "success") {
             if (value === false) {
                 errorOccurred = true;
                 let errorMessage = "";
-                let faceOffError = localStorage.getItem("faceoff_error");
-                let ulixesError = localStorage.getItem("ulixes_error");
+                let faceOffError = localStorage.getItem("error_faceoff");
+                let ulixesError = localStorage.getItem("error_ulixes");
                 if (faceOffError != null) {
                     errorMessage += "An error has occurred in Face-Off: " + faceOffError + "\n";
                 }
@@ -71,8 +72,6 @@ async function extractImageFromJsonAddToLocalStorage(json) {
                     errorMessage += "An error has occurred in Ulixes: " + ulixesError + "\n";
                 }
                 alert(errorMessage);
-            } else {
-                continue;
             }
         }
         localStorage.setItem(key, value);
@@ -109,7 +108,7 @@ async function uploadImageClick() {
 
     let fetchRes = await postJsonToPythonAPI(domain, "image_receiver", jsonBody);
     let jsonFromFetchRes = await extractJsonFromFetchRes(fetchRes);
-    await extractImageFromJsonAddToLocalStorage(jsonFromFetchRes);
+    await extractDataFromJsonAddToLocalStorage(jsonFromFetchRes);
     return true;
 }
 // endregion
