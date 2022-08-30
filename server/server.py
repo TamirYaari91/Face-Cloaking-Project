@@ -18,12 +18,12 @@ filename_for_original_image_cropped = "cropped.jpg"
 filename_for_perturbated_image_faceoff = "faceoff_perturbated.jpg"
 filename_for_perturbated_cropped_image_ulixes = "ulixes_perturbated_cropped.jpg"
 filename_for_perturbated_image_ulixes = "ulixes_perturbated.jpg"
-list_of_extensions_to_remove = (".jpg", ".jpeg", ".png")
+images_extensions = (".jpg", ".jpeg", ".png")
 
 # Set up Flask:
 app = Flask(__name__)
 
-# Set up Flask to bypass CORS:
+# Set up Flask to bypass CORS - needed when running locally, will be removed in future versions
 cors = CORS(app)
 
 
@@ -32,12 +32,6 @@ def get_image_base64_string_from_data(data):
     im_b64 = list(image_json.values())[0]
     im_b64 = im_b64[im_b64.find(",") + 1:]
     return im_b64
-
-
-def image_base64_string_to_pil_image(im_b64):
-    img_string = base64.b64decode(im_b64)
-    img = Image.open(BytesIO(img_string))
-    return img
 
 
 def image_base64_string_to_jpeg(im_b64, filename):
@@ -55,16 +49,9 @@ def pil_image_to_image_base64_string(img, image_format):
 
 def delete_all_images_from_server():
     for file in os.listdir("."):
-        for extension in list_of_extensions_to_remove:
+        for extension in images_extensions:
             if file.endswith(extension):
                 os.remove(file)
-
-
-def calc_dssim_original():
-    command = "dssim " + ctu.filename_for_original_image + " " + ctu.filename_for_original_image
-    output = os.popen(command).read()
-    output = [val.strip() for val in output.split('\t')]
-    return output[0]
 
 
 def calc_dssim_faceoff():
@@ -83,7 +70,7 @@ def calc_dssim_ulixes():
 
 def set_ulixes_parameters(input_param):
     # input param is in range of [1,5] and ulixes epochs needs to be in [100,300], threshold needs to be in [0.006,0.01]
-    parameters = [(300, 0.006),(250, 0.007),(200, 0.008),(150, 0.009),(100, 0.01)]
+    parameters = [(300, 0.006), (250, 0.007), (200, 0.008), (150, 0.009), (100, 0.01)]
     return parameters[input_param - 1]
 
 
@@ -182,5 +169,5 @@ def image_handler():
 
 
 if __name__ == "__main__":
-    # app.run()
-    app.run(debug=True)
+    app.run()
+    # app.run(debug=True)

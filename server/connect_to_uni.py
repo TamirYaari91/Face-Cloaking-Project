@@ -6,7 +6,7 @@ ssh_port = 22
 my_username = ""  # TODO - insert username here
 my_password = ""  # TODO - insert password here
 nova = "nova.cs.tau.ac.il"
-c_005 = "c-005.cs.tau.ac.il"
+c_005 = "c-005.cs.tau.ac.il"  # Chosen according to the average loads on TAU servers
 filename_for_original_image = "original.jpg"
 filename_for_perturbated_image_faceoff = "faceoff_perturbated.jpg"
 faceoff_basepath = "/home/sharifm/teaching/uspw-0368-3544/2022-spring/group-04/face-off/"
@@ -22,9 +22,6 @@ commands = \
     ]
 
 faceoff_full_command = "\n".join(commands)
-
-ls_myface = ["cd " + filepath_for_original_image, "ls"]
-ls_myface_full_command = "\n".join(ls_myface)
 
 
 def get_path_to_final_perturbation(lines):
@@ -55,14 +52,6 @@ def upload_file_from_path(ssh_client, remote_file_path, local_file_path):
 def delete_file_from_path(ssh_client, filepath, filename):
     del_command = "rm -f -r " + filepath + filename
     ssh_client.exec_command(del_command)
-
-
-faceoff_ret_val = ['Loading Images...\n',
-                   'SUCCESS! Images written to /home/sharifm/teaching/uspw-0368-3544/2022-spring/group-04/face-off/data/new_adv_imgs/cw_l2/small_center/hinge_loss/full/cw_l2_small_center_h_loss_face_pic_bill_marg_5.40_amp_2.500.png\n',
-                   'SUCCESS! Images written to /home/sharifm/teaching/uspw-0368-3544/2022-spring/group-04/face-off/data/new_adv_imgs/cw_l2/small_center/hinge_loss/crop/cw_l2_small_center_h_loss_face_pic_bill_marg_5.40_amp_2.500.png\n',
-                   'Amplifying and Writing Images----------------------5.195116334129125\n',
-                   'Saving Numpy Array---------------------------------0.01307652611285448\n',
-                   'total running time =  165.0762403011322\n']
 
 
 def connect_to_host(host, username, password, port):
