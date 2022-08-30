@@ -153,7 +153,7 @@ def image_handler():
             if faceoff_error_dict["error"] == "timeout":
                 data_for_results_page["error_faceoff"] = "Connection timeout"
             else:
-                data_for_results_page["error_faceoff"] = "File not found"
+                data_for_results_page["error_faceoff"] = "File not found (might be an authentication issue)"
         except Exception as e:
             data_for_results_page["error_faceoff"] = "General error"
             logging.exception(e)
