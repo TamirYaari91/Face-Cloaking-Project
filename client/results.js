@@ -1,11 +1,8 @@
 //region Imports
-
 import {resizeImage} from "./shared_functions_and_consts.js";
-
 //endregion
 
 //region Constants
-
 const resultsOriginalImageBox = document.getElementsByClassName("original_display_image")[0];
 const resultsFaceOffImageBox = document.getElementsByClassName("faceoff_display_image")[0];
 const resultsUlixesImageBox = document.getElementsByClassName("ulixes_display_image")[0];
@@ -31,7 +28,6 @@ const ulixesEvasivenessScoreMap = new Map([ // Calculated offline as explained i
     ["4", "92.1"],
     ["5", "93.52"]
 ])
-
 //endregion
 
 // region Functions
@@ -57,7 +53,6 @@ function openImageInNewTab(imageInputBase64) {
 }
 
 //endregion
-
 resultsJsonKeyToImageBoxClass.set("original", resultsOriginalImageBox);
 resultsJsonKeyToImageBoxClass.set("faceoff", resultsFaceOffImageBox);
 resultsJsonKeyToImageBoxClass.set("ulixes", resultsUlixesImageBox);
@@ -66,7 +61,7 @@ let originalImageInputBase64 = "data:image/jpeg;base64," + localStorage.getItem(
 let faceOffImageInputBase64 = "data:image/jpeg;base64," + localStorage.getItem("faceoff_image");
 let ulixesImageInputBase64 = "data:image/jpeg;base64," + localStorage.getItem("ulixes_image");
 
-let originalDSSIM = "<b>DSSIM:</b> " + "0"; // DSSIM between 2 identical images = 0
+let originalDSSIM = "<b>DSSIM:</b> " + "0"; // DSSIM between 2 identical images == 0
 let faceOffDSSIM = "<b>DSSIM:</b> " + localStorage.getItem("faceoff_dssim");
 let ulixesDSSIM = "<b>DSSIM:</b> " + localStorage.getItem("ulixes_dssim");
 
@@ -91,12 +86,13 @@ ulixesEvasivenessTextBox.innerHTML = ulixesEvasivenessScore;
 originalImageButton.onclick = function () {
     openImageInNewTab(originalImageInputBase64)
 };
+
 faceOffImageButton.onclick = function () {
     openImageInNewTab(faceOffImageInputBase64)
 };
+
 ulixesImageButton.onclick = function () {
     openImageInNewTab(ulixesImageInputBase64)
 };
 
-// localStorage.clear();
-// TODO - Turn this ^ on after everything is done
+localStorage.clear();

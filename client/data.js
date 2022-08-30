@@ -16,11 +16,13 @@ const jsonHeaders = {
 const domain = "http://127.0.0.1:5000/";
 //endregion
 
+//region Variables
 let isFileChosen = false;
 let uploadImageInputBase64;
 let runUlixes = true;
 let runFaceOff = true;
 let errorOccurred = false;
+//endregion
 
 // region Functions
 function fillBoxWithImageFromFile(e, imageBox) {
@@ -110,7 +112,6 @@ async function uploadImageClick() {
     await extractImageFromJsonAddToLocalStorage(jsonFromFetchRes);
     return true;
 }
-
 // endregion
 
 localStorage.clear();
