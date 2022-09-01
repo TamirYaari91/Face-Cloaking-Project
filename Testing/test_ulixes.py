@@ -3,9 +3,9 @@ import os
 from Testing.vggface_identification import identify_face
 from Ulixes.ulixes_controller import cloak_image_with_ulixes
 
-PATH_OF_DIRECTORY_OF_ORIGINAL_IMAGES = "Original images"
-PATH_OF_DIRECTORY_OF_CROPPED_IMAGES = "Testing number of iterations/Cropped images"
-PATH_OF_DIRECTORY_OF_CLOAKED_AND_CROPPED_IMAGES = "Testing number of iterations/Cloaked and cropped images"
+PATH_OF_DIRECTORY_OF_ORIGINAL_IMAGES = "OriginalImages"
+PATH_OF_DIRECTORY_OF_CROPPED_IMAGES = "Testing number of iterations/CroppedImages"
+PATH_OF_DIRECTORY_OF_CLOAKED_AND_CROPPED_IMAGES = "Testing number of iterations/CloakedAndCroppedImages"
 PATH_OF_DIRECTORY_OF_FINAL_CLOAKED_IMAGES = "Testing number of iterations/Final cloaked images"
 NUMBER_OF_EPOCHS_LIST = (100, 150, 200, 250, 300)
 
