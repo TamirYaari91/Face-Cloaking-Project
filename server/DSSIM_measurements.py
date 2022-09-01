@@ -24,9 +24,9 @@ def calc_dssim(folder_num):
 
 folder_nums = ["100", "150", "200", "250", "300"]
 
-for num in folder_nums:
-    res = calc_dssim(num)
-    print("average dssim for " + num + " iterations = " + str(res[0] / res[1]))
+# for num in folder_nums:
+#     res = calc_dssim(num)
+#     print("average dssim for " + num + " iterations = " + str(res[0] / res[1]))
 
 
 # calc_dssim(folder_nums[0])
